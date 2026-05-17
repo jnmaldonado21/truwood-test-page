@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Truwood Pilot — The Forest Watch</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --deep:#01090505;
+  --deep:#010905;
+  --forest:#041A0C;
+  --mid:#083A1A;
+  --bright:#00E580;
+  --teal:#00C4CC;
+  --ice:#A8F0D8;
+  --text:#D8F2E8;
+  --muted:#3D7A58;
+  --dim:#1A3828;
+}
+html{scroll-behavior:auto;font-size:16px}
+body{background:var(--deep);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden;min-height:100vh}
+
+/* ─── FOREST BACKGROUND ───────────────────────────── */
+#forest-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.tree-layer{position:absolute;bottom:0;left:-20%;width:140%;height:100%;will-change:transform}
+.tree-layer.far{opacity:.12;filter:blur(1.5px)}
+.tree-layer.mid{opacity:.22;filter:blur(.6px)}
+.tree-layer.near{opacity:.38}
+.light-shafts{position:absolute;inset:0;overflow:hidden;opacity:.07}
+.shaft{position:absolute;top:-10%;width:60px;height:130%;background:linear-gradient(to bottom,rgba(0,229,128,.9),transparent);transform:skewX(-18deg);animation:shaftDrift linear infinite}
+@keyframes shaftDrift{0%{transform:skewX(-18deg) translateX(0)}100%{transform:skewX(-18deg) translateX(30vw)}}
+.particles{position:absolute;inset:0;overflow:hidden}
+.pt{position:absolute;border-radius:50%;background:var(--bright);animation:ptFloat ease-in-out infinite;opacity:0}
+@keyframes ptFloat{
+  0%{opacity:0;transform:translateY(0) scale(.5)}
+  20%{opacity:.7}
+  80%{opacity:.5}
+  100%{opacity:0;transform:translateY(-80px) scale(1.2)}
+}
+.pt-blue{background:var(--teal)}
+
+/* ─── NAV ─────────────────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:1.2rem 2.5rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(12px);background:rgba(1,9,5,.55);border-bottom:1px solid rgba(0,229,128,.08)}
+.nl{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:.25em;color:var(--bright);text-transform:uppercase}
+.nc{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--deep);background:var(--bright);padding:.6rem 1.5rem;cursor:pointer;border:none;transition:all .25s}
+.nc:hover{background:var(--teal)}
+
+/* ─── HERO ────────────────────────────────────────── */
+#hero{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:0 1.5rem}
+.hero-glow{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,229,128,.12) 0%,transparent 65%);border-radius:50%;pointer-events:none;animation:gPulse 4s ease-in-out infinite}
+@keyframes gPulse{0%,100%{transform:scale(.95);opacity:.8}50%{transform:scale(1.05);opacity:1}}
+#hero-watch{position:relative;z-index:2;animation:watchFloat 5s ease-in-out infinite;filter:drop-shadow(0 20px 40px rgba(0,229,128,.15)) drop-shadow(0 0 60px rgba(0,196,204,.08))}
+@keyframes watchFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(.3deg)}}
+.gleam{position:absolute;top:0;left:0;right:0;bottom:0;border-radius:50%;background:conic-gradient(transparent 0deg,transparent 250deg,rgba(168,240,216,.12) 280deg,transparent 310deg);animation:gleamSpin 6s linear infinite;pointer-events:none}
+.hero-eyebrow{font-family:'Syne',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.55em;text-transform:uppercase;color:var(--bright);text-align:center;margin-top:2rem;opacity:0}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(4rem,11vw,9.5rem);font-weight:800;letter-spacing:-.02em;color:var(--text);text-align:center;line-height:.95;margin-top:.6rem;opacity:0}
+.hero-title em{color:var(--bright);font-style:normal}
+.hero-sub{font-size:clamp(.85rem,1.8vw,1rem);font-weight:300;color:rgba(216,242,232,.55);text-align:center;margin-top:1.2rem;letter-spacing:.04em;opacity:0;max-width:420px}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;opacity:0}
+.scroll-hint span{font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;color:var(--muted)}
+.scroll-track{width:1px;height:52px;position:relative;overflow:hidden;background:rgba(0,229,128,.15)}
+.scroll-dot{width:1px;height:20px;background:var(--bright);position:absolute;top:-20px;animation:sdrop 1.8s ease-in-out infinite}
+@keyframes sdrop{0%{top:-20px;opacity:1}100%{top:52px;opacity:0}}
+
+/* ─── SHARED ──────────────────────────────────────── */
+.ch-eyebrow{font-family:'Syne',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:.5em;text-transform:uppercase;color:var(--bright)}
+.ch-title{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,4.5vw,4.2rem);font-weight:700;color:var(--text);line-height:1.05;margin-top:.7rem}
+.ch-body{font-size:.95rem;line-height:1.85;color:rgba(216,242,232,.6);max-width:440px}
+.hl{width:32px;height:2px;background:var(--bright);margin:1.6rem 0;border-radius:1px}
+.btn-g{display:inline-block;padding:.9rem 2.6rem;background:var(--bright);color:var(--deep);font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border:none;transition:all .22s;text-decoration:none}
+.btn-g:hover{background:var(--teal);transform:translateY(-2px)}
+.btn-o{display:inline-block;padding:.9rem 2.6rem;background:transparent;color:var(--text);font-family:'Syne',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border:1px solid rgba(0,229,128,.3);transition:all .22s;text-decoration:none}
+.btn-o:hover{border-color:var(--bright);color:var(--bright)}
+
+/* ─── EXPLODE SECTION ─────────────────────────────── */
+#explode-wrapper{position:relative;z-index:1}
+#explode{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#explode-bg-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,229,128,.04) 0%,transparent 60%,rgba(0,196,204,.04) 100%);pointer-events:none}
+
+.xscene{position:relative;width:min(700px,100vw);height:min(620px,90vh);display:flex;align-items:center;justify-content:center}
+
+/* Each watch part – absolutely centered, will be animated */
+.wpart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);will-change:transform,opacity;cursor:default}
+.wpart svg{display:block}
+
+/* Labels */
+.wlabel{position:absolute;opacity:0;will-change:opacity,transform;pointer-events:none}
+.wl-name{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:600;color:var(--text);letter-spacing:.05em}
+.wl-sub{font-family:'DM Sans',sans-serif;font-size:.62rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--bright);margin-top:.25rem}
+.wl-line{position:absolute;background:rgba(0,229,128,.35);height:1px}
+
+/* explode heading + CTA */
+#x-head{position:absolute;top:6%;left:50%;transform:translateX(-50%);text-align:center;opacity:0;white-space:nowrap}
+#x-cta{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);text-align:center;opacity:0;white-space:nowrap}
+
+/* ─── WOOD ────────────────────────────────────────── */
+#wood{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;overflow:hidden;background:linear-gradient(180deg,transparent 0%,rgba(4,20,10,.85) 20%,rgba(4,20,10,.85) 80%,transparent 100%)}
+.wood-inner{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1100px;margin:0 auto;padding:7rem 3rem}
+.wstats{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:2.5rem}
+.ws{border-left:1px solid rgba(0,229,128,.3);padding-left:.9rem}
+.ws-n{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:700;color:var(--bright);line-height:1}
+.ws-l{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(216,242,232,.4);margin-top:.3rem}
+
+/* ─── MOVEMENT ────────────────────────────────────── */
+#movement-wrapper{position:relative;z-index:1}
+#movement{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.mstage{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;max-width:1100px;width:100%;padding:0 3rem}
+
+/* Insight cards for accessible movement explanation */
+.insights{display:flex;flex-direction:column;gap:.9rem;margin-top:2rem}
+.insight{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.2rem;border:1px solid rgba(0,229,128,.12);background:rgba(0,229,128,.03);transition:all .3s}
+.insight:hover{border-color:rgba(0,229,128,.3);background:rgba(0,229,128,.06)}
+.i-num{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--bright);opacity:.4;line-height:1;min-width:2.5rem}
+.i-text strong{display:block;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:.2rem;letter-spacing:.04em}
+.i-text span{font-size:.8rem;color:rgba(216,242,232,.5);line-height:1.55}
+
+/* ─── CTA ─────────────────────────────────────────── */
+#fcta{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;overflow:hidden}
+.fcta-glow{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(0,229,128,.1) 0%,transparent 60%);border-radius:50%;pointer-events:none}
+.fcta-inner{position:relative;z-index:2}
+.price-block{margin:2rem 0}
+.price-from{font-size:.7rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted)}
+.price-amt{font-family:'Syne',sans-serif;font-size:4.5rem;font-weight:800;color:var(--text);display:block;margin-top:.3rem;line-height:1}
+.cta-btns{display:flex;gap:1rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
+.trust{display:flex;gap:1.8rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
+.ti{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:.4rem}
+.ti::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--bright);display:block}
+.reviews{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:1.4rem}
+.stars{color:var(--bright);letter-spacing:.1em;font-size:1rem}
+.rev-txt{font-size:.78rem;color:var(--muted);letter-spacing:.08em}
+.ft{margin-top:5rem;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.18;font-family:'Syne',sans-serif}
+
+/* ─── MOBILE ──────────────────────────────────────── */
+@media(max-width:768px){
+  nav{padding:1rem 1.2rem}
+  .nc{padding:.5rem 1rem;font-size:.65rem}
+  .wood-inner{grid-template-columns:1fr;padding:5rem 1.5rem;gap:3rem}
+  .mstage{grid-template-columns:1fr;padding:0 1.5rem;gap:2.5rem}
+  #movement{height:auto;padding:5rem 0}
+  .mstage > div:first-child{display:flex;justify-content:center}
+  #gear-svg{width:280px;height:280px}
+  .xscene{height:70vh}
+}
+@media(max-width:480px){
+  .hero-title{font-size:3.5rem}
+  .xscene{width:100vw;height:85vh}
+  .wl-name{font-size:.75rem}
+  .wl-sub{font-size:.56rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── FOREST BACKGROUND ──────────────────────────── -->
+<div id="forest-bg">
+  <div class="light-shafts" id="shafts"></div>
+
+  <!-- Far trees -->
+  <svg class="tree-layer far" viewBox="0 0 1400 500" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs><symbol id="tfar" viewBox="0 0 60 140"><polygon points="30,0 0,50 14,50 0,90 18,90 5,140 55,140 42,90 60,90 46,50 60,50" fill="#0A3020"/><rect x="24" y="120" width="12" height="20" fill="#062010"/></symbol></defs>
+    <use href="#tfar" x="0"   y="360" width="60" height="140"/>
+    <use href="#tfar" x="70"  y="390" width="48" height="110"/>
+    <use href="#tfar" x="140" y="370" width="55" height="130"/>
+    <use href="#tfar" x="210" y="380" width="45" height="120"/>
+    <use href="#tfar" x="275" y="360" width="65" height="140"/>
+    <use href="#tfar" x="355" y="385" width="50" height="115"/>
+    <use href="#tfar" x="420" y="370" width="58" height="130"/>
+    <use href="#tfar" x="490" y="355" width="68" height="145"/>
+    <use href="#tfar" x="570" y="390" width="44" height="110"/>
+    <use href="#tfar" x="625" y="368" width="60" height="132"/>
+    <use href="#tfar" x="700" y="382" width="48" height="118"/>
+    <use href="#tfar" x="760" y="360" width="66" height="140"/>
+    <use href="#tfar" x="840" y="376" width="52" height="124"/>
+    <use href="#tfar" x="900" y="355" width="70" height="145"/>
+    <use href="#tfar" x="985" y="388" width="46" height="112"/>
+    <use href="#tfar" x="1040" y="366" width="58" height="134"/>
+    <use href="#tfar" x="1110" y="378" width="50" height="122"/>
+    <use href="#tfar" x="1170" y="360" width="64" height="140"/>
+    <use href="#tfar" x="1248" y="385" width="48" height="115"/>
+    <use href="#tfar" x="1310" y="370" width="56" height="130"/>
+  </svg>
+
+  <!-- Mid trees -->
+  <svg class="tree-layer mid" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs><symbol id="tmid" viewBox="0 0 70 200"><polygon points="35,0 0,65 18,65 2,115 22,115 8,200 62,200 48,115 68,115 52,65 70,65" fill="#083A18"/><rect x="28" y="170" width="14" height="30" fill="#041808"/></symbol></defs>
+    <use href="#tmid" x="30"  y="400" width="70" height="200"/>
+    <use href="#tmid" x="115" y="430" width="58" height="170"/>
+    <use href="#tmid" x="185" y="410" width="75" height="190"/>
+    <use href="#tmid" x="278" y="420" width="62" height="180"/>
+    <use href="#tmid" x="360" y="395" width="80" height="205"/>
+    <use href="#tmid" x="458" y="418" width="64" height="182"/>
+    <use href="#tmid" x="540" y="404" width="72" height="196"/>
+    <use href="#tmid" x="630" y="432" width="55" height="168"/>
+    <use href="#tmid" x="700" y="410" width="74" height="190"/>
+    <use href="#tmid" x="790" y="396" width="82" height="204"/>
+    <use href="#tmid" x="888" y="422" width="60" height="178"/>
+    <use href="#tmid" x="962" y="406" width="76" height="194"/>
+    <use href="#tmid" x="1055" y="416" width="66" height="184"/>
+    <use href="#tmid" x="1138" y="400" width="78" height="200"/>
+    <use href="#tmid" x="1230" y="428" width="58" height="172"/>
+    <use href="#tmid" x="1300" y="408" width="72" height="192"/>
+  </svg>
+
+  <!-- Near trees -->
+  <svg class="tree-layer near" viewBox="0 0 1400 700" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs><symbol id="tnear" viewBox="0 0 90 280"><polygon points="45,0 0,90 24,90 4,158 28,158 10,280 80,280 62,158 86,158 66,90 90,90" fill="#0F5028"/><rect x="35" y="235" width="20" height="45" fill="#072814"/></symbol></defs>
+    <use href="#tnear" x="-20" y="420" width="90" height="280"/>
+    <use href="#tnear" x="80"  y="450" width="72" height="250"/>
+    <use href="#tnear" x="170" y="430" width="88" height="270"/>
+    <use href="#tnear" x="278" y="412" width="96" height="288"/>
+    <use href="#tnear" x="390" y="445" width="74" height="255"/>
+    <use href="#tnear" x="480" y="425" width="92" height="275"/>
+    <use href="#tnear" x="590" y="435" width="78" height="265"/>
+    <use href="#tnear" x="688" y="415" width="98" height="285"/>
+    <use href="#tnear" x="802" y="440" width="76" height="260"/>
+    <use href="#tnear" x="896" y="422" width="90" height="278"/>
+    <use href="#tnear" x="1000" y="430" width="82" height="270"/>
+    <use href="#tnear" x="1098" y="408" width="100" height="292"/>
+    <use href="#tnear" x="1215" y="442" width="72" height="258"/>
+    <use href="#tnear" x="1308" y="420" width="88" height="280"/>
+  </svg>
+
+  <!-- Ground mist -->
+  <div style="position:absolute;bottom:0;left:0;right:0;height:35vh;background:linear-gradient(to top,rgba(0,229,128,.04) 0%,transparent 100%);pointer-events:none"></div>
+  <div class="particles" id="particles"></div>
+</div>
+
+<!-- ─── NAV ────────────────────────────────────────── -->
+<nav>
+  <div class="nl">Truwood</div>
+  <button class="nc" onclick="document.getElementById('fcta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+</nav>
+
+<!-- ─── HERO ───────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div id="hero-watch" style="position:relative">
+    <!-- Pilot Chronograph Watch SVG -->
+    <svg viewBox="0 0 240 380" width="240" height="380" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hbg" x1="0" y1="0" x2="240" y2="380" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#0C200A"/>
+          <stop offset="100%" stop-color="#040C04"/>
+        </linearGradient>
+        <radialGradient id="hdial" cx="45%" cy="38%" r="65%">
+          <stop offset="0%" stop-color="#181A16"/>
+          <stop offset="100%" stop-color="#090A08"/>
+        </radialGradient>
+        <linearGradient id="hcrown" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1A4028"/>
+          <stop offset="100%" stop-color="#00802A"/>
+        </linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Wood band links - top -->
+      <rect x="84" y="0" width="72" height="14" rx="5" fill="#1A3010"/>
+      <rect x="84" y="14" width="72" height="12" rx="4" fill="#152808"/>
+      <rect x="86" y="26" width="68" height="12" rx="4" fill="#1A3010"/>
+      <rect x="88" y="38" width="64" height="10" rx="4" fill="#152808"/>
+      <rect x="90" y="48" width="60" height="14" rx="4" fill="#1A3010"/>
+      <!-- Wood link grain lines top -->
+      <line x1="96" y1="4" x2="96" y2="11" stroke="rgba(0,229,128,.1)" stroke-width=".8"/>
+      <line x1="120" y1="4" x2="120" y2="11" stroke="rgba(0,229,128,.08)" stroke-width=".8"/>
+      <line x1="144" y1="4" x2="144" y2="11" stroke="rgba(0,229,128,.1)" stroke-width=".8"/>
+      <!-- Case shadow -->
+      <rect x="14" y="60" width="212" height="260" rx="54" fill="#010A04"/>
+      <!-- Main case – 45mm black sandalwood -->
+      <rect x="18" y="64" width="204" height="252" rx="50" fill="url(#hbg)"/>
+      <rect x="18" y="64" width="204" height="252" rx="50" stroke="rgba(0,229,128,.3)" stroke-width="1.5" fill="none"/>
+      <!-- Inner bezel -->
+      <rect x="26" y="72" width="188" height="236" rx="44" fill="none" stroke="rgba(0,229,128,.1)" stroke-width=".8"/>
+      <!-- Lugs -->
+      <rect x="72" y="70" width="28" height="16" rx="5" fill="#0F2810"/>
+      <rect x="140" y="70" width="28" height="16" rx="5" fill="#0F2810"/>
+      <rect x="72" y="294" width="28" height="16" rx="5" fill="#0F2810"/>
+      <rect x="140" y="294" width="28" height="16" rx="5" fill="#0F2810"/>
+      <!-- Crown -->
+      <rect x="216" y="175" width="22" height="16" rx="6" fill="url(#hcrown)"/>
+      <rect x="216" y="175" width="22" height="16" rx="6" stroke="rgba(0,229,128,.5)" stroke-width=".8" fill="none"/>
+      <!-- Pushers -->
+      <rect x="218" y="152" width="16" height="8" rx="3" fill="#0D2010"/>
+      <rect x="218" y="152" width="16" height="8" rx="3" stroke="rgba(0,229,128,.3)" stroke-width=".6" fill="none"/>
+      <rect x="218" y="216" width="16" height="8" rx="3" fill="#0D2010"/>
+      <rect x="218" y="216" width="16" height="8" rx="3" stroke="rgba(0,229,128,.3)" stroke-width=".6" fill="none"/>
+      <!-- Dial -->
+      <circle cx="120" cy="190" r="82" fill="url(#hdial)"/>
+      <!-- Dial texture -->
+      <circle cx="120" cy="190" r="82" fill="none" stroke="rgba(0,229,128,.08)" stroke-width="1"/>
+      <!-- Hour indices -->
+      <g fill="rgba(0,229,128,.8)">
+        <rect x="117.5" y="116" width="5" height="12" rx="1.5"/>
+        <rect x="117.5" y="252" width="5" height="12" rx="1.5"/>
+        <rect x="176" y="187.5" width="12" height="5" rx="1.5"/>
+        <rect x="52" y="187.5" width="12" height="5" rx="1.5"/>
+      </g>
+      <g fill="rgba(0,229,128,.45)">
+        <rect x="149" y="124" width="4" height="8" rx="1" transform="rotate(30 151 128)"/>
+        <rect x="163" y="140" width="4" height="8" rx="1" transform="rotate(60 165 144)"/>
+        <rect x="160" y="236" width="4" height="8" rx="1" transform="rotate(120 162 240)"/>
+        <rect x="147" y="250" width="4" height="8" rx="1" transform="rotate(150 149 254)"/>
+        <rect x="89" y="124" width="4" height="8" rx="1" transform="rotate(-30 91 128)"/>
+        <rect x="73" y="140" width="4" height="8" rx="1" transform="rotate(-60 75 144)"/>
+        <rect x="76" y="236" width="4" height="8" rx="1" transform="rotate(-120 78 240)"/>
+        <rect x="89" y="250" width="4" height="8" rx="1" transform="rotate(-150 91 254)"/>
+      </g>
+      <!-- 3 Subdials – Chronograph -->
+      <!-- 9 o'clock subdial (30-min) -->
+      <circle cx="84" cy="190" r="18" fill="#0A0C08" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+      <line x1="84" y1="190" x2="84" y2="176" stroke="rgba(0,229,128,.7)" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="84" cy="190" r="2" fill="rgba(0,229,128,.6)"/>
+      <!-- 6 o'clock subdial (running seconds) -->
+      <circle cx="120" cy="228" r="18" fill="#0A0C08" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+      <line x1="120" y1="228" x2="128" y2="215" stroke="rgba(0,229,128,.7)" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="120" cy="228" r="2" fill="rgba(0,229,128,.6)"/>
+      <!-- 3 o'clock subdial (12-hour) -->
+      <circle cx="156" cy="190" r="18" fill="#0A0C08" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+      <line x1="156" y1="190" x2="158" y2="174" stroke="rgba(0,229,128,.7)" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="156" cy="190" r="2" fill="rgba(0,229,128,.6)"/>
+      <!-- Date window -->
+      <rect x="136" y="176" width="18" height="12" rx="2.5" fill="#050705" stroke="rgba(0,229,128,.25)" stroke-width=".6"/>
+      <text x="145" y="185" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7.5" fill="rgba(0,229,128,.7)">17</text>
+      <!-- Brand text -->
+      <text x="120" y="162" text-anchor="middle" font-family="Syne,sans-serif" font-size="10" font-weight="700" fill="rgba(0,229,128,.9)" letter-spacing="4">TRUWOOD</text>
+      <text x="120" y="172" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="5" fill="rgba(216,242,232,.3)" letter-spacing="3">PILOT · CHRONOGRAPH</text>
+      <!-- Minute hand -->
+      <path d="M119 190 L116.5 130 L120 124 L123.5 130 Z" fill="#D8F2E8" opacity=".9"/>
+      <!-- Hour hand -->
+      <path d="M120 190 L149 161 L152 155 L157 158 L152 163 L122 192 Z" fill="#D8F2E8" opacity=".9"/>
+      <!-- Chrono second hand -->
+      <line x1="120" y1="190" x2="100" y2="132" stroke="var(--bright)" stroke-width="1.2" stroke-linecap="round" filter="url(#glow)"/>
+      <line x1="120" y1="190" x2="128" y2="214" stroke="var(--bright)" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Center jewel -->
+      <circle cx="120" cy="190" r="5" fill="var(--bright)" opacity=".9" filter="url(#glow)"/>
+      <circle cx="120" cy="190" r="2.5" fill="var(--deep)"/>
+      <!-- Crystal highlight -->
+      <ellipse cx="96" cy="155" rx="22" ry="12" fill="white" opacity=".05" transform="rotate(-28 96 155)"/>
+    </svg>
+    <div class="gleam" style="position:absolute;inset:0;pointer-events:none;animation:gleamSpin 6s linear infinite">
+      <svg viewBox="0 0 240 380" width="240" height="380" style="position:absolute;inset:0">
+        <defs><radialGradient id="gleam1" cx="30%" cy="25%" r="40%"><stop offset="0%" stop-color="rgba(0,229,128,.12)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
+        <rect width="240" height="380" fill="url(#gleam1)" rx="50"/>
+      </svg>
+    </div>
+  </div>
+
+  <p class="hero-eyebrow" id="he">The Forest Watch</p>
+  <h1 class="hero-title" id="ht">PILOT<br><em>Black</em></h1>
+  <p class="hero-sub" id="hs">45mm black sandalwood chronograph. Japanese precision. Grown in nature, worn on your wrist.</p>
+
+  <div class="scroll-hint" id="sh">
+    <span>Scroll to explore</span>
+    <div class="scroll-track"><div class="scroll-dot"></div></div>
+  </div>
+</section>
+
+<!-- ─── EXPLODE SECTION ────────────────────────────── -->
+<div id="explode-wrapper">
+  <section id="explode">
+    <div id="explode-bg-overlay"></div>
+    <div class="xscene" id="xscene">
+
+      <!-- PART: Sapphire Crystal (top layer) -->
+      <div class="wpart" id="px-crystal" style="z-index:7">
+        <svg viewBox="0 0 168 168" width="168" height="168">
+          <circle cx="84" cy="84" r="80" fill="rgba(0,196,204,.07)" stroke="rgba(0,229,128,.35)" stroke-width="1.5"/>
+          <circle cx="84" cy="84" r="70" fill="none" stroke="rgba(0,196,204,.15)" stroke-width="1"/>
+          <ellipse cx="66" cy="56" rx="26" ry="14" fill="white" opacity=".07" transform="rotate(-25 66 56)"/>
+          <ellipse cx="90" cy="40" rx="12" ry="6" fill="white" opacity=".05"/>
+          <text x="84" y="88" text-anchor="middle" font-family="Syne,sans-serif" font-size="9" font-weight="600" fill="rgba(0,196,204,.5)" letter-spacing="3">SAPPHIRE</text>
+          <text x="84" y="100" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7" fill="rgba(0,196,204,.3)" letter-spacing="2">ANTI-REFLECTIVE</text>
+        </svg>
+      </div>
+      <!-- label crystal -->
+      <div class="wlabel" id="lx-crystal" style="right:calc(50% + 110px);text-align:right">
+        <div class="wl-name">Sapphire Crystal</div>
+        <div class="wl-sub">Anti-scratch · 9H</div>
+      </div>
+
+      <!-- PART: Dial -->
+      <div class="wpart" id="px-dial" style="z-index:6">
+        <svg viewBox="0 0 168 168" width="168" height="168">
+          <defs><radialGradient id="dld" cx="45%" cy="38%" r="65%"><stop offset="0%" stop-color="#181A16"/><stop offset="100%" stop-color="#090A08"/></radialGradient></defs>
+          <circle cx="84" cy="84" r="80" fill="url(#dld)"/>
+          <circle cx="84" cy="84" r="80" stroke="rgba(0,229,128,.15)" stroke-width="1" fill="none"/>
+          <!-- Subdials -->
+          <circle cx="52" cy="84" r="16" fill="#0A0C08" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+          <circle cx="84" cy="114" r="16" fill="#0A0C08" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+          <circle cx="116" cy="84" r="16" fill="#0A0C08" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+          <!-- Minute track -->
+          <circle cx="84" cy="84" r="70" fill="none" stroke="rgba(0,229,128,.08)" stroke-width="1"/>
+          <!-- 4 main indices -->
+          <rect x="81.5" y="14" width="5" height="10" rx="1.5" fill="rgba(0,229,128,.8)"/>
+          <rect x="81.5" y="144" width="5" height="10" rx="1.5" fill="rgba(0,229,128,.8)"/>
+          <rect x="148" y="81.5" width="10" height="5" rx="1.5" fill="rgba(0,229,128,.8)"/>
+          <rect x="10" y="81.5" width="10" height="5" rx="1.5" fill="rgba(0,229,128,.8)"/>
+          <!-- Brand -->
+          <text x="84" y="66" text-anchor="middle" font-family="Syne,sans-serif" font-size="9" font-weight="700" fill="rgba(0,229,128,.9)" letter-spacing="3.5">TRUWOOD</text>
+          <text x="84" y="75" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="5" fill="rgba(216,242,232,.3)" letter-spacing="2">PILOT · CHRONO</text>
+        </svg>
+      </div>
+      <!-- label dial -->
+      <div class="wlabel" id="lx-dial" style="left:calc(50% + 105px)">
+        <div class="wl-name">Black Dial</div>
+        <div class="wl-sub">3 Subdials · Chrono</div>
+      </div>
+
+      <!-- PART: Case Bezel Ring -->
+      <div class="wpart" id="px-case" style="z-index:5">
+        <svg viewBox="0 0 220 220" width="220" height="220">
+          <defs><linearGradient id="clg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1A2A18"/><stop offset="100%" stop-color="#0A1208"/></linearGradient></defs>
+          <circle cx="110" cy="110" r="106" fill="url(#clg)" stroke="rgba(0,229,128,.3)" stroke-width="2"/>
+          <circle cx="110" cy="110" r="88" fill="none" stroke="rgba(0,229,128,.1)" stroke-width=".8"/>
+          <!-- Lugs -->
+          <rect x="82" y="4" width="28" height="14" rx="5" fill="#0F2A10"/>
+          <rect x="110" y="4" width="28" height="14" rx="5" fill="#0F2A10"/>
+          <rect x="82" y="202" width="28" height="14" rx="5" fill="#0F2A10"/>
+          <rect x="110" y="202" width="28" height="14" rx="5" fill="#0F2A10"/>
+          <!-- Crown + pushers -->
+          <rect x="212" y="103" width="20" height="14" rx="5" fill="#0D2010"/>
+          <rect x="212" y="103" width="20" height="14" rx="5" stroke="rgba(0,229,128,.4)" stroke-width=".8" fill="none"/>
+          <rect x="214" y="82" width="14" height="7" rx="2.5" fill="#0A1A0A" stroke="rgba(0,229,128,.25)" stroke-width=".6"/>
+          <rect x="214" y="131" width="14" height="7" rx="2.5" fill="#0A1A0A" stroke="rgba(0,229,128,.25)" stroke-width=".6"/>
+          <text x="110" y="114" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7" fill="rgba(0,229,128,.2)" letter-spacing="2.5">BLACK SANDALWOOD</text>
+          <text x="110" y="124" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7" fill="rgba(0,229,128,.15)" letter-spacing="2">45MM · 10.5MM</text>
+        </svg>
+      </div>
+      <!-- label case -->
+      <div class="wlabel" id="lx-case" style="right:calc(50% + 130px);text-align:right">
+        <div class="wl-name">Black Sandalwood Case</div>
+        <div class="wl-sub">45mm · 100% Natural Wood</div>
+      </div>
+
+      <!-- PART: Japanese Movement -->
+      <div class="wpart" id="px-move" style="z-index:4">
+        <svg viewBox="0 0 160 80" width="160" height="80">
+          <rect x="1" y="1" width="158" height="78" rx="8" fill="#060E08" stroke="rgba(0,229,128,.4)" stroke-width="1"/>
+          <!-- PCB trace style details -->
+          <rect x="12" y="12" width="40" height="8" rx="2" fill="rgba(0,229,128,.12)"/>
+          <rect x="12" y="24" width="28" height="8" rx="2" fill="rgba(0,229,128,.08)"/>
+          <rect x="12" y="36" width="34" height="8" rx="2" fill="rgba(0,229,128,.1)"/>
+          <rect x="12" y="50" width="22" height="8" rx="2" fill="rgba(0,229,128,.08)"/>
+          <rect x="12" y="62" width="30" height="8" rx="2" fill="rgba(0,229,128,.1)"/>
+          <!-- Main coil/crystal -->
+          <rect x="65" y="14" width="36" height="52" rx="5" fill="rgba(0,229,128,.08)" stroke="rgba(0,229,128,.3)" stroke-width=".8"/>
+          <rect x="72" y="22" width="22" height="36" rx="3" fill="rgba(0,196,204,.12)"/>
+          <text x="83" y="43" text-anchor="middle" font-family="Syne,sans-serif" font-size="7" font-weight="600" fill="rgba(0,229,128,.6)" letter-spacing="1">QUARTZ</text>
+          <!-- Gear train area -->
+          <circle cx="122" cy="25" r="10" fill="none" stroke="rgba(0,229,128,.3)" stroke-width=".8"/>
+          <circle cx="138" cy="40" r="8" fill="none" stroke="rgba(0,229,128,.25)" stroke-width=".8"/>
+          <circle cx="122" cy="55" r="10" fill="none" stroke="rgba(0,229,128,.3)" stroke-width=".8"/>
+          <circle cx="122" cy="25" r="3" fill="rgba(0,229,128,.3)"/>
+          <circle cx="138" cy="40" r="3" fill="rgba(0,229,128,.25)"/>
+          <circle cx="122" cy="55" r="3" fill="rgba(0,229,128,.3)"/>
+          <!-- Made in Japan label -->
+          <text x="80" y="74" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="5.5" fill="rgba(0,229,128,.35)" letter-spacing="2">JAPANESE QUARTZ MOVEMENT</text>
+        </svg>
+      </div>
+      <!-- label move -->
+      <div class="wlabel" id="lx-move" style="left:calc(50% + 92px)">
+        <div class="wl-name">Japanese Movement</div>
+        <div class="wl-sub">Quartz · Precision</div>
+      </div>
+
+      <!-- PART: Case Back -->
+      <div class="wpart" id="px-back" style="z-index:3">
+        <svg viewBox="0 0 220 220" width="220" height="220">
+          <defs><linearGradient id="cbk" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0E1E0C"/><stop offset="100%" stop-color="#060C05"/></linearGradient></defs>
+          <circle cx="110" cy="110" r="106" fill="url(#cbk)" stroke="rgba(0,229,128,.2)" stroke-width="1.5"/>
+          <circle cx="110" cy="110" r="92" fill="none" stroke="rgba(0,229,128,.08)" stroke-width="1" stroke-dasharray="5 4"/>
+          <circle cx="110" cy="110" r="70" fill="none" stroke="rgba(0,229,128,.06)" stroke-width=".8"/>
+          <text x="110" y="102" text-anchor="middle" font-family="Syne,sans-serif" font-size="10" font-weight="700" fill="rgba(0,229,128,.4)" letter-spacing="4">TRUWOOD</text>
+          <text x="110" y="115" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7" fill="rgba(0,229,128,.2)" letter-spacing="2">WATER RESISTANT</text>
+          <text x="110" y="126" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7" fill="rgba(0,229,128,.2)" letter-spacing="2">3ATM · HANDCRAFTED</text>
+          <!-- Screw heads -->
+          <g fill="none" stroke="rgba(0,229,128,.2)" stroke-width=".8">
+            <circle cx="110" cy="30" r="5"/><line x1="107" y1="30" x2="113" y2="30"/>
+            <circle cx="175" cy="60" r="5"/><line x1="175" y1="57" x2="175" y2="63"/>
+            <circle cx="185" cy="145" r="5"/><line x1="182" y1="145" x2="188" y2="145"/>
+            <circle cx="110" cy="190" r="5"/><line x1="107" y1="190" x2="113" y2="190"/>
+            <circle cx="35" cy="145" r="5"/><line x1="35" y1="142" x2="35" y2="148"/>
+            <circle cx="45" cy="60" r="5"/><line x1="42" y1="60" x2="48" y2="60"/>
+          </g>
+        </svg>
+      </div>
+      <!-- label back -->
+      <div class="wlabel" id="lx-back" style="right:calc(50% + 130px);text-align:right">
+        <div class="wl-name">Case Back</div>
+        <div class="wl-sub">Water resistant · 3ATM</div>
+      </div>
+
+      <!-- PART: Band Top -->
+      <div class="wpart" id="px-band-t" style="z-index:2">
+        <svg viewBox="0 0 80 80" width="80" height="80">
+          <rect x="1" y="1" width="78" height="18" rx="5" fill="#0F2010"/>
+          <rect x="1" y="20" width="78" height="16" rx="4" fill="#0C1A0C"/>
+          <rect x="1" y="37" width="78" height="16" rx="4" fill="#0F2010"/>
+          <rect x="1" y="54" width="78" height="16" rx="4" fill="#0C1A0C"/>
+          <rect x="1" y="71" width="78" height="8" rx="3" fill="#0F2010"/>
+          <!-- Wood grain on links -->
+          <line x1="18" y1="2" x2="18" y2="17" stroke="rgba(0,229,128,.12)" stroke-width=".7"/>
+          <line x1="40" y1="2" x2="40" y2="17" stroke="rgba(0,229,128,.08)" stroke-width=".7"/>
+          <line x1="62" y1="2" x2="62" y2="17" stroke="rgba(0,229,128,.12)" stroke-width=".7"/>
+        </svg>
+      </div>
+      <!-- label band-t -->
+      <div class="wlabel" id="lx-band-t" style="left:calc(50% + 55px)">
+        <div class="wl-name">Wood Link Band</div>
+        <div class="wl-sub">Black Sandalwood</div>
+      </div>
+
+      <!-- PART: Band Bottom -->
+      <div class="wpart" id="px-band-b" style="z-index:2">
+        <svg viewBox="0 0 80 80" width="80" height="80">
+          <rect x="1" y="1" width="78" height="8" rx="3" fill="#0F2010"/>
+          <rect x="1" y="10" width="78" height="16" rx="4" fill="#0C1A0C"/>
+          <rect x="1" y="27" width="78" height="16" rx="4" fill="#0F2010"/>
+          <rect x="1" y="44" width="78" height="16" rx="4" fill="#0C1A0C"/>
+          <rect x="1" y="61" width="78" height="18" rx="5" fill="#0F2010"/>
+          <!-- Buckle holes -->
+          <circle cx="40" cy="72" r="3" fill="none" stroke="rgba(0,229,128,.25)" stroke-width=".8"/>
+          <circle cx="52" cy="72" r="3" fill="none" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+          <circle cx="64" cy="72" r="3" fill="none" stroke="rgba(0,229,128,.2)" stroke-width=".8"/>
+        </svg>
+      </div>
+      <!-- label band-b -->
+      <div class="wlabel" id="lx-band-b" style="right:calc(50% + 55px);text-align:right">
+        <div class="wl-name">Quick-Release Band</div>
+        <div class="wl-sub">Spring-bar system</div>
+      </div>
+
+      <!-- Chapter heading -->
+      <div id="x-head">
+        <p class="ch-eyebrow">The Anatomy</p>
+        <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--text);margin-top:.4rem">Every Layer, Engineered</h2>
+      </div>
+      <!-- CTA -->
+      <div id="x-cta">
+        <p class="ch-eyebrow" style="margin-bottom:1.4rem">6 layers of craftsmanship</p>
+        <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap">
+          <button class="btn-g" onclick="document.getElementById('fcta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+          <button class="btn-o">All Specifications</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── WOOD SECTION ───────────────────────────────── -->
+<section id="wood">
+  <div class="wood-inner">
+    <div id="wood-txt">
+      <p class="ch-eyebrow">Chapter II — The Material</p>
+      <h2 class="ch-title">Born from<br>the Forest Floor</h2>
+      <div class="hl"></div>
+      <p class="ch-body">Each Truwood case is hand-cut from genuine black sandalwood — one of nature's densest, most aromatic hardwoods. It doesn't just look like nature. It smells like it.</p>
+      <p class="ch-body" style="margin-top:.9rem">No two watches share the same grain pattern. The watch you receive has never existed before, and never will again.</p>
+      <div class="wstats">
+        <div class="ws"><div class="ws-n">45<span style="font-size:1.2rem">mm</span></div><div class="ws-l">Case diameter</div></div>
+        <div class="ws"><div class="ws-n">100%</div><div class="ws-l">Natural wood</div></div>
+        <div class="ws"><div class="ws-n">0</div><div class="ws-l">Identical pieces</div></div>
+        <div class="ws"><div class="ws-n">10+</div><div class="ws-l">Trees planted per order</div></div>
+      </div>
+      <div style="margin-top:2.5rem;display:flex;gap:.8rem;flex-wrap:wrap">
+        <button class="btn-g" onclick="document.getElementById('fcta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+        <button class="btn-o">Wood Types</button>
+      </div>
+    </div>
+    <div id="wood-vis" style="display:flex;justify-content:center;align-items:center">
+      <svg viewBox="0 0 280 300" width="280" height="300">
+        <defs>
+          <radialGradient id="wsg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#1A4010"/>
+            <stop offset="18%" stop-color="#123008"/>
+            <stop offset="35%" stop-color="#0C2406"/>
+            <stop offset="52%" stop-color="#081C04"/>
+            <stop offset="68%" stop-color="#061404"/>
+            <stop offset="82%" stop-color="#040E02"/>
+            <stop offset="100%" stop-color="#020802"/>
+          </radialGradient>
+          <clipPath id="wsc"><circle cx="140" cy="140" r="128"/></clipPath>
+        </defs>
+        <circle cx="140" cy="140" r="128" fill="url(#wsg)"/>
+        <!-- Tree rings with green tint -->
+        <circle cx="140" cy="140" r="18"  fill="none" stroke="rgba(0,100,30,.6)"  stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="32"  fill="none" stroke="rgba(0,80,24,.5)"   stroke-width="1"/>
+        <circle cx="140" cy="140" r="48"  fill="none" stroke="rgba(0,100,30,.55)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="62"  fill="none" stroke="rgba(0,80,24,.45)"  stroke-width="1"/>
+        <circle cx="140" cy="140" r="78"  fill="none" stroke="rgba(0,100,30,.5)"  stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="94"  fill="none" stroke="rgba(0,80,24,.4)"   stroke-width="1"/>
+        <circle cx="140" cy="140" r="110" fill="none" stroke="rgba(0,100,30,.45)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="126" fill="none" stroke="rgba(0,60,18,.5)"   stroke-width="2"/>
+        <!-- Grain -->
+        <line x1="12" y1="140" x2="268" y2="140" stroke="rgba(0,80,24,.12)" stroke-width="1" clip-path="url(#wsc)"/>
+        <line x1="140" y1="12"  x2="140" y2="268" stroke="rgba(0,80,24,.1)"  stroke-width="1" clip-path="url(#wsc)"/>
+        <circle cx="140" cy="140" r="128" fill="none" stroke="#010905" stroke-width="5"/>
+        <!-- Center glow -->
+        <circle cx="140" cy="140" r="5" fill="var(--bright)" opacity=".5" filter="url(#glow)"/>
+        <line x1="142" y1="139" x2="175" y2="139" stroke="rgba(0,229,128,.3)" stroke-width=".7"/>
+        <text x="178" y="143" font-family="Syne,sans-serif" font-size="7" font-weight="600" fill="rgba(0,229,128,.5)" letter-spacing="1">68 rings</text>
+        <text x="140" y="280" text-anchor="middle" font-family="Syne,sans-serif" font-size="11" font-weight="700" fill="rgba(0,229,128,.55)" letter-spacing="4">SANDALWOOD</text>
+        <text x="140" y="293" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7.5" fill="rgba(216,242,232,.3)" letter-spacing="2.5">HANDCRAFTED</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ─── MOVEMENT SECTION ───────────────────────────── -->
+<div id="movement-wrapper">
+  <section id="movement">
+    <div class="mstage">
+      <!-- Gear Visual -->
+      <div id="mvis">
+        <svg id="gear-svg" viewBox="0 0 340 340" width="340" height="340" fill="none">
+          <defs><filter id="mglow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <!-- Outer ring -->
+          <circle cx="170" cy="170" r="160" fill="rgba(0,229,128,.02)" stroke="rgba(0,229,128,.15)" stroke-width="1"/>
+          <circle cx="170" cy="170" r="140" fill="none" stroke="rgba(0,229,128,.06)" stroke-width=".8" stroke-dasharray="4 4"/>
+          <!-- Forest light pulse rings -->
+          <circle cx="170" cy="170" r="120" fill="none" stroke="rgba(0,196,204,.08)" stroke-width="12" opacity=".5"/>
+          <!-- Main gear -->
+          <g id="g1">
+            <circle cx="170" cy="170" r="55" fill="rgba(0,229,128,.04)" stroke="rgba(0,229,128,.6)" stroke-width="2"/>
+            <circle cx="170" cy="170" r="44" fill="none" stroke="rgba(0,229,128,.2)" stroke-width="1"/>
+            <line x1="170" y1="170" x2="170" y2="115" stroke="rgba(0,229,128,.5)" stroke-width="1.5"/>
+            <line x1="170" y1="170" x2="218" y2="198" stroke="rgba(0,229,128,.5)" stroke-width="1.5"/>
+            <line x1="170" y1="170" x2="122" y2="198" stroke="rgba(0,229,128,.5)" stroke-width="1.5"/>
+            <g stroke="rgba(0,229,128,.7)" stroke-width="2.2" stroke-linecap="round">
+              <line x1="170" y1="115" x2="170" y2="104"/><line x1="188" y1="119" x2="193" y2="108"/>
+              <line x1="202" y1="132" x2="210" y2="124"/><line x1="209" y1="150" x2="219" y2="148"/>
+              <line x1="208" y1="168" x2="219" y2="170"/><line x1="200" y1="186" x2="209" y2="191"/>
+              <line x1="186" y1="200" x2="192" y2="210"/><line x1="170" y1="204" x2="170" y2="215"/>
+              <line x1="154" y1="200" x2="148" y2="210"/><line x1="140" y1="186" x2="131" y2="191"/>
+              <line x1="132" y1="168" x2="121" y2="170"/><line x1="131" y1="150" x2="121" y2="148"/>
+              <line x1="138" y1="132" x2="130" y2="124"/><line x1="152" y1="119" x2="147" y2="108"/>
+            </g>
+            <circle cx="170" cy="170" r="12" fill="rgba(0,229,128,.2)" filter="url(#mglow)"/>
+            <circle cx="170" cy="170" r="5" fill="var(--bright)" opacity=".8"/>
+            <circle cx="170" cy="170" r="2.5" fill="var(--deep)"/>
+          </g>
+          <!-- Pallet gear -->
+          <g id="g2">
+            <circle cx="252" cy="108" r="30" fill="rgba(0,196,204,.04)" stroke="rgba(0,196,204,.5)" stroke-width="1.5"/>
+            <line x1="252" y1="108" x2="252" y2="78" stroke="rgba(0,196,204,.4)" stroke-width="1.2"/>
+            <line x1="252" y1="108" x2="278" y2="123" stroke="rgba(0,196,204,.4)" stroke-width="1.2"/>
+            <line x1="252" y1="108" x2="226" y2="123" stroke="rgba(0,196,204,.4)" stroke-width="1.2"/>
+            <g stroke="rgba(0,196,204,.55)" stroke-width="1.8" stroke-linecap="round">
+              <line x1="252" y1="78" x2="252" y2="70"/><line x1="266" y1="82" x2="270" y2="74"/>
+              <line x1="276" y1="93" x2="283" y2="88"/><line x1="281" y1="107" x2="289" y2="106"/>
+              <line x1="279" y1="121" x2="287" y2="124"/><line x1="271" y1="134" x2="277" y2="140"/>
+              <line x1="259" y1="141" x2="263" y2="149"/><line x1="244" y1="141" x2="241" y2="149"/>
+              <line x1="233" y1="134" x2="227" y2="140"/><line x1="225" y1="121" x2="217" y2="124"/>
+              <line x1="223" y1="107" x2="215" y2="106"/><line x1="228" y1="93" x2="221" y2="88"/>
+              <line x1="238" y1="82" x2="234" y2="74"/>
+            </g>
+            <circle cx="252" cy="108" r="6" fill="rgba(0,196,204,.3)"/>
+            <circle cx="252" cy="108" r="2.5" fill="var(--bright)" opacity=".7"/>
+          </g>
+          <!-- Balance wheel -->
+          <g id="g3">
+            <circle cx="262" cy="232" r="26" fill="rgba(0,229,128,.04)" stroke="rgba(0,229,128,.5)" stroke-width="2"/>
+            <line x1="236" y1="232" x2="288" y2="232" stroke="rgba(0,229,128,.5)" stroke-width="1.5"/>
+            <line x1="262" y1="206" x2="262" y2="258" stroke="rgba(0,229,128,.5)" stroke-width="1.5"/>
+            <circle cx="236" cy="232" r="5" fill="rgba(0,229,128,.4)" filter="url(#mglow)"/>
+            <circle cx="288" cy="232" r="5" fill="rgba(0,229,128,.4)" filter="url(#mglow)"/>
+            <circle cx="262" cy="232" r="5" fill="var(--bright)" opacity=".7"/>
+          </g>
+          <!-- Barrel -->
+          <g id="g4">
+            <circle cx="98" cy="108" r="34" fill="rgba(0,196,204,.03)" stroke="rgba(0,196,204,.4)" stroke-width="1.5"/>
+            <circle cx="98" cy="108" r="26" fill="none" stroke="rgba(0,196,204,.15)" stroke-width="1"/>
+            <g stroke="rgba(0,196,204,.45)" stroke-width="1.8" stroke-linecap="round">
+              <line x1="98" y1="74" x2="98" y2="65"/><line x1="115" y1="79" x2="119" y2="70"/>
+              <line x1="127" y1="92" x2="133" y2="86"/><line x1="132" y1="108" x2="141" y2="108"/>
+              <line x1="127" y1="124" x2="133" y2="130"/><line x1="115" y1="137" x2="119" y2="146"/>
+              <line x1="98" y1="142" x2="98" y2="151"/><line x1="81" y1="137" x2="77" y2="146"/>
+              <line x1="69" y1="124" x2="63" y2="130"/><line x1="64" y1="108" x2="55" y2="108"/>
+              <line x1="69" y1="92" x2="63" y2="86"/><line x1="81" y1="79" x2="77" y2="70"/>
+            </g>
+            <circle cx="98" cy="108" r="7" fill="rgba(0,196,204,.25)"/>
+            <circle cx="98" cy="108" r="3" fill="var(--teal)" opacity=".8"/>
+          </g>
+          <!-- Connecting lines -->
+          <line x1="170" y1="170" x2="252" y2="108" stroke="rgba(0,229,128,.07)" stroke-width="1" stroke-dasharray="4 5"/>
+          <line x1="170" y1="170" x2="98"  y2="108" stroke="rgba(0,196,204,.07)" stroke-width="1" stroke-dasharray="4 5"/>
+          <line x1="252" y1="108" x2="262" y2="232" stroke="rgba(0,229,128,.06)" stroke-width="1" stroke-dasharray="4 5"/>
+          <!-- Labels -->
+          <text x="170" y="310" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="rgba(0,229,128,.4)" letter-spacing="4">JAPANESE MOVEMENT</text>
+          <text x="170" y="325" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(216,242,232,.2)" letter-spacing="2.5">PRECISION QUARTZ</text>
+        </svg>
+      </div>
+
+      <!-- Accessible explanations -->
+      <div id="mtxt">
+        <p class="ch-eyebrow">Chapter III — The Engine</p>
+        <h2 class="ch-title">No Battery.<br>No Problem.</h2>
+        <div class="hl"></div>
+        <p class="ch-body">You don't need to know how watches work to appreciate this one. Here's what matters:</p>
+        <div class="insights">
+          <div class="insight">
+            <div class="i-num">01</div>
+            <div class="i-text">
+              <strong>It never needs winding</strong>
+              <span>The movement inside harvests energy from your wrist's natural motion. Wear it, and it stays alive.</span>
+            </div>
+          </div>
+          <div class="insight">
+            <div class="i-num">02</div>
+            <div class="i-text">
+              <strong>More accurate than you'd expect from wood</strong>
+              <span>The Japanese quartz module keeps time to within ±15 seconds per month — that's precision you can trust daily.</span>
+            </div>
+          </div>
+          <div class="insight">
+            <div class="i-num">03</div>
+            <div class="i-text">
+              <strong>The stopwatch actually works</strong>
+              <span>Those 3 subdials aren't decorative. Start, stop, and lap time with the two pushers on the side.</span>
+            </div>
+          </div>
+          <div class="insight">
+            <div class="i-num">04</div>
+            <div class="i-text">
+              <strong>Made in the same country that perfected precision</strong>
+              <span>Japan has been making the world's most reliable watch movements for over 150 years. This continues that legacy.</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:2.2rem">
+          <button class="btn-g" onclick="document.getElementById('fcta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── FINAL CTA ──────────────────────────────────── -->
+<section id="fcta">
+  <div class="fcta-glow"></div>
+  <div class="fcta-inner" id="fcta-inner">
+    <p class="ch-eyebrow">The Truwood Pilot</p>
+    <h2 style="font-family:'Syne',sans-serif;font-size:clamp(3rem,7.5vw,7.5rem);font-weight:800;color:var(--text);line-height:.95;margin-top:.6rem">OWN YOUR<br><em style="color:var(--bright);font-style:normal">FOREST</em></h2>
+    <div class="reviews">
+      <span class="stars">★★★★★</span>
+      <span class="rev-txt">4.9 · 2,841 reviews</span>
+    </div>
+    <div class="price-block">
+      <span class="price-from">Starting from</span>
+      <span class="price-amt">$259</span>
+    </div>
+    <div class="cta-btns">
+      <button class="btn-g" style="padding:1.1rem 3.5rem;font-size:.82rem">Add to Cart</button>
+      <button class="btn-o" style="padding:1.1rem 3.5rem">View All Models</button>
+    </div>
+    <div class="trust">
+      <span class="ti">Free worldwide shipping</span>
+      <span class="ti">1-year warranty</span>
+      <span class="ti">30-day returns</span>
+      <span class="ti">10 trees planted per order</span>
+    </div>
+    <p class="ft">Truwood Timepieces · Every order plants 10 trees · Est. 2019</p>
+  </div>
+</section>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ─── PARTICLES ────────────────────────────────── */
+(function createParticles(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<35;i++){
+    const p=document.createElement('div');
+    p.className='pt'+(Math.random()>.6?' pt-blue':'');
+    const s=1+Math.random()*2.5;
+    p.style.cssText=`left:${Math.random()*100}vw;top:${20+Math.random()*70}vh;width:${s}px;height:${s}px;animation-delay:${Math.random()*10}s;animation-duration:${7+Math.random()*7}s`;
+    c.appendChild(p);
+  }
+})();
+
+/* ─── LIGHT SHAFTS ─────────────────────────────── */
+(function createShafts(){
+  const c=document.getElementById('shafts');
+  const positions=[8,18,28,40,54,66,78,88];
+  const durations=[22,28,18,32,24,20,26,30];
+  positions.forEach((x,i)=>{
+    const s=document.createElement('div');
+    s.className='shaft';
+    s.style.cssText=`left:${x}%;opacity:${.4+Math.random()*.6};animation-duration:${durations[i]}s;animation-delay:${-Math.random()*durations[i]}s;width:${40+Math.random()*60}px`;
+    c.appendChild(s);
+  });
+})();
+
+/* ─── HERO ANIMATION ───────────────────────────── */
+gsap.set(['#hero-watch','#he','#ht','#hs','#sh'],{opacity:0});
+gsap.set('#hero-watch',{y:40,scale:.92});
+gsap.set(['#he','#ht'],{y:30});
+gsap.set('#hs',{y:20});
+
+gsap.timeline({delay:.4})
+  .to('#hero-watch',{opacity:1,y:0,scale:1,duration:1.4,ease:'power3.out'})
+  .to('#he',{opacity:1,y:0,duration:.8,ease:'power3.out'},0.55)
+  .to('#ht',{opacity:1,y:0,duration:.9,ease:'power3.out'},0.7)
+  .to('#hs',{opacity:1,y:0,duration:.8,ease:'power3.out'},0.9)
+  .to('#sh',{opacity:1,duration:.6},1.3);
+
+/* ─── FOREST PARALLAX ──────────────────────────── */
+const layers=document.querySelectorAll('.tree-layer');
+layers.forEach((l,i)=>{
+  const speed=[0.15,0.35,0.6][i];
+  gsap.to(l,{
+    x:()=>-window.innerWidth*speed*0.3,
+    ease:'none',
+    scrollTrigger:{trigger:'body',start:'top top',end:'bottom bottom',scrub:1}
+  });
+  /* Gentle sway */
+  gsap.to(l,{
+    x:`+=${[8,12,18][i]}`,
+    duration:[5,4,3][i],
+    repeat:-1,yoyo:true,ease:'sine.inOut'
+  });
+});
+
+/* ─── EXPLODE SETUP ────────────────────────────── */
+/* Natural assembled positions (y offset from center) */
+const assembled={
+  'px-crystal': {y:-135, x:0,   r:0,   scale:.85},
+  'px-dial':    {y:-100, x:0,   r:0,   scale:.85},
+  'px-case':    {y:0,    x:0,   r:0,   scale:1},
+  'px-move':    {y:120,  x:0,   r:0,   scale:.9},
+  'px-back':    {y:150,  x:0,   r:0,   scale:1},
+  'px-band-t':  {y:-200, x:0,   r:0,   scale:.8},
+  'px-band-b':  {y:220,  x:0,   r:0,   scale:.8},
+};
+/* Exploded positions */
+const exploded={
+  'px-crystal': {y:-240, x:0,    r:0,   scale:1},
+  'px-dial':    {y:-145, x:0,    r:0,   scale:1},
+  'px-case':    {y:0,    x:0,    r:0,   scale:1},
+  'px-move':    {y:170,  x:0,    r:0,   scale:1},
+  'px-back':    {y:270,  x:0,    r:0,   scale:1},
+  'px-band-t':  {y:-340, x:0,    r:0,   scale:1},
+  'px-band-b':  {y:390,  x:0,    r:0,   scale:1},
+};
+
+/* Label positions (matching exploded) */
+const labelPos={
+  'lx-crystal': {y:-240},
+  'lx-dial':    {y:-145},
+  'lx-case':    {y:0},
+  'lx-move':    {y:170},
+  'lx-back':    {y:270},
+  'lx-band-t':  {y:-340},
+  'lx-band-b':  {y:390},
+};
+
+/* Set initial assembled positions */
+Object.entries(assembled).forEach(([id,pos])=>{
+  gsap.set(`#${id}`,{x:pos.x,y:pos.y,rotation:pos.r,scale:pos.scale,opacity:0});
+});
+/* Position labels at exploded Y */
+Object.entries(labelPos).forEach(([id,pos])=>{
+  gsap.set(`#${id}`,{y:pos.y,opacity:0,x:0});
+});
+gsap.set('#x-head',{opacity:0,y:-16});
+gsap.set('#x-cta',{opacity:0,y:16});
+
+const xtl=gsap.timeline({
+  scrollTrigger:{
+    trigger:'#explode-wrapper',
+    start:'top top',
+    end:'+=3200',
+    pin:true,
+    scrub:1.2,
+    anticipatePin:1,
+  }
+});
+
+/* 0-8%: heading fades in */
+xtl.to('#x-head',{opacity:1,y:0,duration:.1},0);
+
+/* 5-15%: all parts fade in at assembled positions */
+Object.keys(assembled).forEach((id,i)=>{
+  xtl.to(`#${id}`,{opacity:1,duration:.08},0.05+i*.01);
+});
+
+/* 15-60%: parts separate to exploded positions */
+Object.entries(exploded).forEach(([id,pos])=>{
+  xtl.to(`#${id}`,{y:pos.y,scale:pos.scale,duration:.45,ease:'power2.out'},0.15);
+});
+
+/* 60-80%: labels fade in */
+Object.keys(labelPos).forEach((id,i)=>{
+  xtl.to(`#${id}`,{opacity:1,duration:.1},0.6+i*.025);
+});
+
+/* 78-92%: CTA appears */
+xtl.to('#x-cta',{opacity:1,y:0,duration:.14},0.8);
+
+/* ─── GEAR ANIMATIONS ──────────────────────────── */
+gsap.to('#g1',{rotation:360, transformOrigin:'170px 170px',duration:6,  repeat:-1,ease:'none'});
+gsap.to('#g2',{rotation:-360,transformOrigin:'252px 108px',duration:4,  repeat:-1,ease:'none'});
+gsap.to('#g4',{rotation:360, transformOrigin:'98px 108px', duration:8,  repeat:-1,ease:'none'});
+gsap.to('#g3',{rotation:22,  transformOrigin:'262px 232px',duration:.4, repeat:-1,yoyo:true,ease:'sine.inOut'});
+
+/* ─── MOVEMENT PIN ─────────────────────────────── */
+ScrollTrigger.create({
+  trigger:'#movement-wrapper',
+  start:'top top',
+  end:'+=1800',
+  pin:true,
+  anticipatePin:1,
+});
+
+gsap.from('#mvis',{
+  scrollTrigger:{trigger:'#movement-wrapper',start:'top 85%',end:'top 15%',scrub:1},
+  x:-60,opacity:0
+});
+gsap.from('#mtxt > *',{
+  scrollTrigger:{trigger:'#movement-wrapper',start:'top 85%',end:'top 20%',scrub:.8},
+  x:50,opacity:0,stagger:.08
+});
+
+/* ─── WOOD SECTION ─────────────────────────────── */
+gsap.from('#wood-txt > *',{
+  scrollTrigger:{trigger:'#wood',start:'top 80%',end:'top 20%',scrub:.8},
+  x:-50,opacity:0,stagger:.1
+});
+gsap.from('#wood-vis',{
+  scrollTrigger:{trigger:'#wood',start:'top 80%',end:'top 20%',scrub:.8},
+  x:50,opacity:0,scale:.9
+});
+
+/* ─── FINAL CTA ────────────────────────────────── */
+gsap.from('#fcta-inner > *',{
+  scrollTrigger:{trigger:'#fcta',start:'top 75%',end:'top 15%',scrub:.7},
+  y:50,opacity:0,stagger:.08
+});
+</script>
+</body>
+</html>
