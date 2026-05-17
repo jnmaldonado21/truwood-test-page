@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Truwood Pilot — The Forest Watch</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── FOUNDATIONS ─────────────────────────────────────── */
+:root{
+  --f-d:'Syne',sans-serif;
+  --f-b:'DM Sans',sans-serif;
+  --txt:#E4F0EC;
+  --dim:rgba(228,240,236,.45);
+  /* per-section accents */
+  --a-hero:#00D96A;
+  --a-anatomy:#5AAFFF;
+  --a-wood:#9EC840;
+  --a-move:#00FFBA;
+  --a-cta:#00D96A;
+}
+html{font-size:16px;scroll-behavior:auto}
+body{background:#030303;color:var(--txt);font-family:var(--f-b);font-weight:300;overflow-x:hidden}
+::selection{background:rgba(0,217,106,.2)}
+
+/* ── NAV ─────────────────────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;background:rgba(3,3,3,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05)}
+.n-logo{font-family:var(--f-d);font-size:.95rem;font-weight:700;letter-spacing:.22em;color:var(--a-hero);text-transform:uppercase}
+.n-btn{font-family:var(--f-d);font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:var(--a-hero);color:#030303;border:none;padding:.55rem 1.4rem;cursor:pointer;transition:opacity .2s}
+.n-btn:hover{opacity:.85}
+
+/* ── SECTION SHELLS ──────────────────────────────────── */
+.section{position:relative;overflow:hidden}
+
+/* hero: midnight black */
+#s-hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#030303;padding-top:56px}
+#s-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 50% 58%,rgba(0,80,35,.22) 0%,transparent 70%);pointer-events:none}
+
+/* anatomy: cold alpine — deep blue-black */
+#s-anatomy{height:100vh;background:#02080E;display:flex;align-items:center;justify-content:center}
+#s-anatomy::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 80%,rgba(0,40,100,.2) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 80% 20%,rgba(0,20,60,.15) 0%,transparent 55%);pointer-events:none}
+
+/* wood: old growth — warm dark */
+#s-wood{min-height:100vh;display:flex;align-items:center;background:#090600}
+#s-wood::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 70% 60%,rgba(50,30,0,.25) 0%,transparent 65%),radial-gradient(ellipse 40% 50% at 10% 40%,rgba(20,40,0,.2) 0%,transparent 55%);pointer-events:none}
+
+/* movement: deep jungle */
+#s-movement{height:100vh;display:flex;align-items:center;justify-content:center;background:#010B05}
+#s-movement::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 35% 50%,rgba(0,30,15,.4) 0%,transparent 60%);pointer-events:none}
+
+/* cta: clearing — back to deep black */
+#s-cta{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#030303;text-align:center;padding:6rem 2rem}
+#s-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 55%,rgba(0,80,35,.18) 0%,transparent 65%);pointer-events:none}
+
+/* fine grain overlay on all sections */
+.section::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.028;pointer-events:none;z-index:0}
+.section > *{position:relative;z-index:1}
+
+/* ── HERO ─────────────────────────────────────────────── */
+.hero-watch-wrap{position:relative}
+.hero-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,217,106,.08);animation:ringPulse 4s ease-in-out infinite;top:50%;left:50%;transform:translate(-50%,-50%)}
+@keyframes ringPulse{0%,100%{transform:translate(-50%,-50%) scale(.95);opacity:.4}50%{transform:translate(-50%,-50%) scale(1.04);opacity:.8}}
+.hero-txt{text-align:center;margin-top:2.8rem}
+.hero-eyebrow{font-family:var(--f-d);font-size:.62rem;font-weight:600;letter-spacing:.6em;text-transform:uppercase;color:var(--a-hero);opacity:.8}
+.hero-h{font-family:var(--f-d);font-size:clamp(4.5rem,10vw,9rem);font-weight:800;letter-spacing:-.03em;line-height:.95;color:var(--txt);margin-top:.5rem}
+.hero-h em{color:var(--a-hero);font-style:normal}
+.hero-sub{font-size:clamp(.85rem,1.5vw,.95rem);font-weight:300;color:var(--dim);margin-top:1.1rem;letter-spacing:.03em}
+.scroll-cue{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.scroll-cue span{font-family:var(--f-d);font-size:.58rem;letter-spacing:.45em;text-transform:uppercase;color:rgba(228,240,236,.25)}
+.scroll-bar{width:1px;height:48px;background:rgba(228,240,236,.1);overflow:hidden;position:relative}
+.scroll-bar-fill{width:1px;height:16px;background:var(--a-hero);position:absolute;top:-16px;animation:sbFill 1.9s ease-in-out infinite}
+@keyframes sbFill{0%{top:-16px;opacity:1}100%{top:48px;opacity:0}}
+
+/* ── ANATOMY ─────────────────────────────────────────── */
+.anatomy-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;width:100%;max-width:1080px;padding:0 4rem;gap:2rem;height:100%}
+.anat-watch{display:flex;align-items:center;justify-content:center}
+.anat-text{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center}
+.layer-panel{position:absolute;width:100%;opacity:0;transform:translateY(18px)}
+.layer-panel.is-active{opacity:1;transform:translateY(0)}
+.panel-tag{font-family:var(--f-d);font-size:.6rem;font-weight:600;letter-spacing:.5em;text-transform:uppercase;color:var(--a-anatomy);display:flex;align-items:center;gap:.7rem}
+.panel-tag::before{content:'';width:24px;height:1px;background:var(--a-anatomy);display:block}
+.panel-h{font-family:var(--f-d);font-size:clamp(2rem,3.5vw,3.2rem);font-weight:700;line-height:1.05;color:var(--txt);margin-top:.9rem}
+.panel-body{font-size:.92rem;line-height:1.82;color:var(--dim);margin-top:1.1rem;max-width:400px}
+.panel-stat{font-family:var(--f-d);font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--a-anatomy);margin-top:1.8rem;padding-top:1.4rem;border-top:1px solid rgba(90,175,255,.15)}
+.step-row{display:flex;align-items:center;gap:.4rem;margin-top:2.8rem}
+.step-d{width:20px;height:2px;background:rgba(90,175,255,.2);border-radius:1px;transition:all .4s}
+.step-d.active{width:32px;background:var(--a-anatomy)}
+.step-num{font-family:var(--f-d);font-size:.6rem;letter-spacing:.2em;color:rgba(90,175,255,.35);margin-left:.6rem}
+
+/* ── WOOD ─────────────────────────────────────────────── */
+.wood-inner{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;max-width:1080px;width:100%;padding:7rem 4rem;margin:0 auto}
+.wood-hl{font-family:var(--f-d);font-size:.6rem;font-weight:600;letter-spacing:.5em;text-transform:uppercase;color:var(--a-wood);display:flex;align-items:center;gap:.7rem}
+.wood-hl::before{content:'';width:24px;height:1px;background:var(--a-wood);display:block}
+.wood-h{font-family:var(--f-d);font-size:clamp(2.2rem,4vw,3.8rem);font-weight:700;line-height:1.05;color:var(--txt);margin-top:.9rem}
+.wood-body{font-size:.92rem;line-height:1.82;color:var(--dim);margin-top:1.1rem;max-width:420px}
+.wood-stats{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:2.6rem}
+.ws{border-left:1px solid rgba(158,200,64,.25);padding-left:1rem}
+.ws-n{font-family:var(--f-d);font-size:2rem;font-weight:700;color:var(--a-wood);line-height:1}
+.ws-l{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(228,240,236,.35);margin-top:.3rem}
+
+/* ── MOVEMENT ────────────────────────────────────────── */
+.move-inner{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;max-width:1080px;width:100%;padding:0 4rem}
+.move-hl{font-family:var(--f-d);font-size:.6rem;font-weight:600;letter-spacing:.5em;text-transform:uppercase;color:var(--a-move);display:flex;align-items:center;gap:.7rem}
+.move-hl::before{content:'';width:24px;height:1px;background:var(--a-move);display:block}
+.move-h{font-family:var(--f-d);font-size:clamp(2rem,3.5vw,3.2rem);font-weight:700;line-height:1.05;color:var(--txt);margin-top:.8rem}
+.cards{display:flex;flex-direction:column;gap:.7rem;margin-top:1.8rem}
+.card{padding:1.1rem 1.3rem;border:1px solid rgba(0,255,186,.1);background:rgba(0,255,186,.025);transition:border-color .3s}
+.card:hover{border-color:rgba(0,255,186,.25)}
+.card-n{font-family:var(--f-d);font-size:.58rem;font-weight:600;letter-spacing:.35em;text-transform:uppercase;color:var(--a-move);opacity:.6;margin-bottom:.35rem}
+.card-h{font-family:var(--f-d);font-size:.95rem;font-weight:700;color:var(--txt);margin-bottom:.3rem}
+.card-p{font-size:.82rem;color:var(--dim);line-height:1.65}
+
+/* ── CTA ─────────────────────────────────────────────── */
+.cta-tag{font-family:var(--f-d);font-size:.6rem;font-weight:600;letter-spacing:.5em;text-transform:uppercase;color:var(--a-cta)}
+.cta-h{font-family:var(--f-d);font-size:clamp(3.5rem,8vw,8rem);font-weight:800;letter-spacing:-.03em;line-height:.93;color:var(--txt);margin-top:.7rem}
+.cta-h em{color:var(--a-cta);font-style:normal}
+.reviews{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:1.8rem}
+.stars{color:var(--a-cta);letter-spacing:.08em;font-size:1rem}
+.rev{font-size:.78rem;color:var(--dim);letter-spacing:.05em}
+.price{font-family:var(--f-d);font-size:clamp(2rem,4vw,3.5rem);font-weight:700;color:var(--txt);margin-top:1.2rem;letter-spacing:-.01em}
+.price span{font-size:1rem;font-weight:400;color:var(--dim);margin-right:.4rem;letter-spacing:.05em}
+.btn-row{display:flex;gap:.8rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
+.btn-p{font-family:var(--f-d);font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:var(--a-cta);color:#030303;border:none;padding:1rem 2.8rem;cursor:pointer;transition:opacity .2s}
+.btn-p:hover{opacity:.85}
+.btn-s{font-family:var(--f-d);font-size:.7rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;background:transparent;color:var(--txt);border:1px solid rgba(255,255,255,.18);padding:1rem 2.8rem;cursor:pointer;transition:border-color .2s}
+.btn-s:hover{border-color:rgba(255,255,255,.4)}
+.trust{display:flex;gap:1.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.6rem}
+.ti{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(228,240,236,.3);display:flex;align-items:center;gap:.4rem}
+.ti::before{content:'';width:3px;height:3px;background:var(--a-cta);border-radius:50%;display:block}
+.footer-note{font-family:var(--f-d);font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(228,240,236,.12);margin-top:5rem}
+
+/* ── BUTTONS SHARED ──────────────────────────────────── */
+.btn-g{font-family:var(--f-d);font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:var(--a-hero);color:#030303;border:none;padding:.9rem 2.2rem;cursor:pointer;transition:opacity .2s;text-decoration:none;display:inline-block}
+.btn-g:hover{opacity:.85}
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media(max-width:860px){
+  .anatomy-inner{grid-template-columns:1fr;padding:0 1.5rem 0;gap:0;grid-template-rows:auto 1fr}
+  .anat-watch{padding-top:70px}
+  .anat-watch svg{width:180px!important;height:240px!important}
+  .anat-text{padding:1.5rem 0 4rem}
+  .layer-panel{position:relative;transform:none!important}
+  .layer-panel:not(.is-active){display:none}
+  .panel-h{font-size:1.8rem}
+
+  .wood-inner{grid-template-columns:1fr;padding:5rem 1.5rem;gap:2.5rem}
+  .wood-inner > div:last-child{display:flex;justify-content:center}
+
+  .move-inner{grid-template-columns:1fr;padding:0 1.5rem}
+  #s-movement{height:auto;padding:5rem 0}
+  .move-inner > div:first-child{display:flex;justify-content:center}
+  #gear-svg{width:240px!important;height:240px!important}
+
+  nav{padding:0 1.2rem}
+  .n-btn{padding:.5rem 1rem;font-size:.6rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────── -->
+<nav>
+  <div class="n-logo">Truwood</div>
+  <button class="n-btn" onclick="document.getElementById('s-cta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+</nav>
+
+<!-- ── HERO: Midnight Forest ───────────────────────────── -->
+<section class="section" id="s-hero">
+  <div class="hero-watch-wrap" id="hero-watch">
+    <div class="hero-ring" style="width:380px;height:380px;animation-delay:0s"></div>
+    <div class="hero-ring" style="width:480px;height:480px;animation-delay:1.2s;opacity:.4"></div>
+    <svg viewBox="0 0 260 380" width="260" height="380" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hcase" x1="0" y1="0" x2="260" y2="380" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#141C12"/>
+          <stop offset="100%" stop-color="#080C06"/>
+        </linearGradient>
+        <radialGradient id="hdial" cx="42%" cy="36%" r="65%">
+          <stop offset="0%" stop-color="#161612"/>
+          <stop offset="100%" stop-color="#080806"/>
+        </radialGradient>
+        <filter id="hglow"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="hglow2"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Band top -->
+      <rect x="89" y="0" width="82" height="10" rx="4" fill="#0E1A0A"/>
+      <rect x="89" y="10" width="82" height="13" rx="4" fill="#0B1408"/>
+      <rect x="91" y="23" width="78" height="12" rx="4" fill="#0E1A0A"/>
+      <rect x="93" y="35" width="74" height="11" rx="4" fill="#0B1408"/>
+      <rect x="95" y="46" width="70" height="14" rx="5" fill="#0E1A0A"/>
+      <line x1="112" y1="1" x2="112" y2="9" stroke="rgba(0,217,106,.09)" stroke-width=".8"/>
+      <line x1="130" y1="1" x2="130" y2="9" stroke="rgba(0,217,106,.07)" stroke-width=".8"/>
+      <line x1="148" y1="1" x2="148" y2="9" stroke="rgba(0,217,106,.09)" stroke-width=".8"/>
+      <!-- Band bottom -->
+      <rect x="89" y="316" width="82" height="14" rx="5" fill="#0E1A0A"/>
+      <rect x="91" y="330" width="78" height="12" rx="4" fill="#0B1408"/>
+      <rect x="93" y="342" width="74" height="12" rx="4" fill="#0E1A0A"/>
+      <rect x="95" y="354" width="70" height="13" rx="4" fill="#0B1408"/>
+      <rect x="97" y="367" width="66" height="13" rx="4" fill="#0E1A0A"/>
+      <circle cx="128" cy="374" r="3.5" fill="none" stroke="rgba(0,217,106,.2)" stroke-width="1"/>
+      <circle cx="140" cy="374" r="3.5" fill="none" stroke="rgba(0,217,106,.15)" stroke-width="1"/>
+      <!-- Case shadow -->
+      <rect x="14" y="60" width="232" height="260" rx="56" fill="rgba(0,0,0,.6)"/>
+      <!-- Case -->
+      <rect x="18" y="64" width="224" height="252" rx="52" fill="url(#hcase)"/>
+      <rect x="18" y="64" width="224" height="252" rx="52" stroke="rgba(0,217,106,.22)" stroke-width="1.2" fill="none"/>
+      <!-- Inner bevel -->
+      <rect x="26" y="72" width="208" height="236" rx="46" fill="none" stroke="rgba(0,217,106,.07)" stroke-width="1"/>
+      <!-- Lugs -->
+      <rect x="78" y="72" width="30" height="14" rx="5" fill="#10180C"/>
+      <rect x="152" y="72" width="30" height="14" rx="5" fill="#10180C"/>
+      <rect x="78" y="294" width="30" height="14" rx="5" fill="#10180C"/>
+      <rect x="152" y="294" width="30" height="14" rx="5" fill="#10180C"/>
+      <!-- Crown -->
+      <rect x="238" y="178" width="22" height="16" rx="6" fill="#0C1A0C"/>
+      <rect x="238" y="178" width="22" height="16" rx="6" stroke="rgba(0,217,106,.35)" stroke-width=".9" fill="none"/>
+      <!-- Pushers -->
+      <rect x="240" y="158" width="16" height="7" rx="2.5" fill="#0A1208"/>
+      <rect x="240" y="158" width="16" height="7" rx="2.5" stroke="rgba(0,217,106,.2)" stroke-width=".7" fill="none"/>
+      <rect x="240" y="217" width="16" height="7" rx="2.5" fill="#0A1208"/>
+      <rect x="240" y="217" width="16" height="7" rx="2.5" stroke="rgba(0,217,106,.2)" stroke-width=".7" fill="none"/>
+      <!-- Dial -->
+      <circle cx="130" cy="190" r="88" fill="url(#hdial)"/>
+      <circle cx="130" cy="190" r="88" stroke="rgba(0,217,106,.1)" stroke-width="1" fill="none"/>
+      <!-- Minute track -->
+      <circle cx="130" cy="190" r="78" fill="none" stroke="rgba(0,217,106,.06)" stroke-width="1"/>
+      <!-- Hour indices -->
+      <rect x="127" y="112" width="6" height="13" rx="2" fill="rgba(0,217,106,.75)"/>
+      <rect x="127" y="255" width="6" height="13" rx="2" fill="rgba(0,217,106,.75)"/>
+      <rect x="196" y="187" width="13" height="6" rx="2" fill="rgba(0,217,106,.75)"/>
+      <rect x="51" y="187" width="13" height="6" rx="2" fill="rgba(0,217,106,.75)"/>
+      <g fill="rgba(0,217,106,.35)">
+        <circle cx="163" cy="122" r="2.5"/><circle cx="184" cy="144" r="2.5"/>
+        <circle cx="192" cy="170" r="2.5"/><circle cx="184" cy="214" r="2.5"/>
+        <circle cx="163" cy="236" r="2.5"/><circle cx="97"  cy="122" r="2.5"/>
+        <circle cx="76"  cy="144" r="2.5"/><circle cx="68"  cy="170" r="2.5"/>
+        <circle cx="76"  cy="214" r="2.5"/><circle cx="97"  cy="236" r="2.5"/>
+      </g>
+      <!-- 3 Subdials -->
+      <circle cx="92"  cy="190" r="19" fill="#0A0A08" stroke="rgba(0,217,106,.18)" stroke-width=".8"/>
+      <circle cx="130" cy="230" r="19" fill="#0A0A08" stroke="rgba(0,217,106,.18)" stroke-width=".8"/>
+      <circle cx="168" cy="190" r="19" fill="#0A0A08" stroke="rgba(0,217,106,.18)" stroke-width=".8"/>
+      <line x1="92"  y1="190" x2="92"  y2="175" stroke="rgba(0,217,106,.65)" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="130" y1="230" x2="138" y2="216" stroke="rgba(0,217,106,.65)" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="168" y1="190" x2="170" y2="173" stroke="rgba(0,217,106,.65)" stroke-width="1.1" stroke-linecap="round"/>
+      <!-- Date window -->
+      <rect x="143" y="179" width="18" height="12" rx="2.5" fill="#050505" stroke="rgba(0,217,106,.25)" stroke-width=".6"/>
+      <text x="152" y="188" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7.5" fill="rgba(0,217,106,.65)">17</text>
+      <!-- Brand -->
+      <text x="130" y="172" text-anchor="middle" font-family="Syne,sans-serif" font-size="9.5" font-weight="700" fill="rgba(0,217,106,.85)" letter-spacing="4">TRUWOOD</text>
+      <text x="130" y="181" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="5" fill="rgba(228,240,236,.25)" letter-spacing="3">PILOT · CHRONOGRAPH</text>
+      <!-- Minute hand -->
+      <path d="M129 190 L126.5 132 L130 126 L133.5 132 Z" fill="#E4F0EC" opacity=".88"/>
+      <!-- Hour hand -->
+      <path d="M130 190 L160 162 L163 156 L168 159 L163 165 L132 193 Z" fill="#E4F0EC" opacity=".88"/>
+      <!-- Chrono hand -->
+      <line x1="130" y1="190" x2="110" y2="130" stroke="#00D96A" stroke-width="1.1" stroke-linecap="round" filter="url(#hglow)"/>
+      <line x1="130" y1="190" x2="138" y2="216" stroke="#00D96A" stroke-width="1.1" stroke-linecap="round"/>
+      <!-- Center -->
+      <circle cx="130" cy="190" r="5.5" fill="#00D96A" opacity=".9" filter="url(#hglow2)"/>
+      <circle cx="130" cy="190" r="2.5" fill="#030303"/>
+      <!-- Crystal shimmer -->
+      <ellipse cx="104" cy="155" rx="24" ry="13" fill="white" opacity=".04" transform="rotate(-26 104 155)"/>
+    </svg>
+  </div>
+  <div class="hero-txt" id="hero-txt">
+    <p class="hero-eyebrow">The Forest Watch</p>
+    <h1 class="hero-h">Pilot.<br><em>Black.</em></h1>
+    <p class="hero-sub">45mm black sandalwood chronograph.<br>Worn by those who carry the forest with them.</p>
+  </div>
+  <div class="scroll-cue" id="scroll-cue">
+    <span>Scroll to explore</span>
+    <div class="scroll-bar"><div class="scroll-bar-fill"></div></div>
+  </div>
+</section>
+
+<!-- ── ANATOMY: Alpine Night ───────────────────────────── -->
+<div id="anatomy-wrapper">
+  <section class="section" id="s-anatomy">
+    <div class="anatomy-inner">
+
+      <!-- Watch with named layers -->
+      <div class="anat-watch">
+        <svg viewBox="0 0 260 380" width="300" height="432" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="ag"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="ag2"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <radialGradient id="adial" cx="42%" cy="36%" r="65%">
+              <stop offset="0%" stop-color="#161612"/><stop offset="100%" stop-color="#080806"/>
+            </radialGradient>
+          </defs>
+
+          <!-- LAYER: STRAP -->
+          <g id="al-strap" opacity=".12">
+            <rect x="89" y="0" width="82" height="10" rx="4" fill="#0E1A0A"/>
+            <rect x="89" y="10" width="82" height="13" rx="4" fill="#0B1408"/>
+            <rect x="91" y="23" width="78" height="12" rx="4" fill="#0E1A0A"/>
+            <rect x="93" y="35" width="74" height="11" rx="4" fill="#0B1408"/>
+            <rect x="95" y="46" width="70" height="14" rx="5" fill="#0E1A0A"/>
+            <line x1="112" y1="1" x2="112" y2="9" stroke="rgba(0,217,106,.15)" stroke-width=".8"/>
+            <line x1="130" y1="1" x2="130" y2="9" stroke="rgba(0,217,106,.12)" stroke-width=".8"/>
+            <line x1="148" y1="1" x2="148" y2="9" stroke="rgba(0,217,106,.15)" stroke-width=".8"/>
+            <rect x="89" y="316" width="82" height="14" rx="5" fill="#0E1A0A"/>
+            <rect x="91" y="330" width="78" height="12" rx="4" fill="#0B1408"/>
+            <rect x="93" y="342" width="74" height="12" rx="4" fill="#0E1A0A"/>
+            <rect x="95" y="354" width="70" height="13" rx="4" fill="#0B1408"/>
+            <rect x="97" y="367" width="66" height="13" rx="4" fill="#0E1A0A"/>
+            <circle cx="128" cy="374" r="3.5" fill="none" stroke="rgba(0,217,106,.3)" stroke-width="1"/>
+            <circle cx="140" cy="374" r="3.5" fill="none" stroke="rgba(0,217,106,.2)" stroke-width="1"/>
+          </g>
+
+          <!-- LAYER: CASE -->
+          <g id="al-case" opacity=".12">
+            <rect x="14" y="60" width="232" height="260" rx="56" fill="rgba(0,0,0,.5)"/>
+            <rect x="18" y="64" width="224" height="252" rx="52" fill="#12180E" stroke="rgba(90,175,255,.3)" stroke-width="1.2"/>
+            <rect x="26" y="72" width="208" height="236" rx="46" fill="none" stroke="rgba(90,175,255,.1)" stroke-width="1"/>
+            <rect x="78" y="72" width="30" height="14" rx="5" fill="#10180C"/>
+            <rect x="152" y="72" width="30" height="14" rx="5" fill="#10180C"/>
+            <rect x="78" y="294" width="30" height="14" rx="5" fill="#10180C"/>
+            <rect x="152" y="294" width="30" height="14" rx="5" fill="#10180C"/>
+            <rect x="238" y="178" width="22" height="16" rx="6" fill="#0C1A0C" stroke="rgba(90,175,255,.4)" stroke-width=".9"/>
+            <rect x="240" y="158" width="16" height="7" rx="2.5" fill="#0A1208" stroke="rgba(90,175,255,.25)" stroke-width=".7"/>
+            <rect x="240" y="217" width="16" height="7" rx="2.5" fill="#0A1208" stroke="rgba(90,175,255,.25)" stroke-width=".7"/>
+          </g>
+
+          <!-- LAYER: MOVEMENT -->
+          <g id="al-move" opacity=".12">
+            <rect x="46" y="122" width="168" height="136" rx="12" fill="#05100A" stroke="rgba(90,175,255,.35)" stroke-width="1"/>
+            <rect x="62" y="138" width="50" height="10" rx="3" fill="rgba(90,175,255,.12)"/>
+            <rect x="62" y="152" width="36" height="10" rx="3" fill="rgba(90,175,255,.08)"/>
+            <rect x="62" y="166" width="44" height="10" rx="3" fill="rgba(90,175,255,.1)"/>
+            <rect x="62" y="180" width="28" height="10" rx="3" fill="rgba(90,175,255,.08)"/>
+            <rect x="62" y="194" width="40" height="10" rx="3" fill="rgba(90,175,255,.1)"/>
+            <rect x="62" y="208" width="32" height="10" rx="3" fill="rgba(90,175,255,.08)"/>
+            <rect x="128" y="138" width="50" height="76" rx="6" fill="rgba(90,175,255,.06)" stroke="rgba(90,175,255,.2)" stroke-width=".8"/>
+            <rect x="138" y="148" width="30" height="56" rx="4" fill="rgba(90,175,255,.08)"/>
+            <circle cx="172" cy="192" r="14" fill="none" stroke="rgba(90,175,255,.25)" stroke-width=".8"/>
+            <circle cx="172" cy="192" r="6" fill="rgba(90,175,255,.2)"/>
+            <text x="130" y="232" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="6.5" fill="rgba(90,175,255,.35)" letter-spacing="2">JAPANESE QUARTZ</text>
+          </g>
+
+          <!-- LAYER: DIAL -->
+          <g id="al-dial" opacity=".12">
+            <circle cx="130" cy="190" r="88" fill="url(#adial)"/>
+            <circle cx="130" cy="190" r="88" stroke="rgba(90,175,255,.15)" stroke-width="1" fill="none"/>
+            <circle cx="130" cy="190" r="78" fill="none" stroke="rgba(90,175,255,.06)" stroke-width="1"/>
+            <rect x="127" y="112" width="6" height="13" rx="2" fill="rgba(90,175,255,.6)"/>
+            <rect x="127" y="255" width="6" height="13" rx="2" fill="rgba(90,175,255,.6)"/>
+            <rect x="196" y="187" width="13" height="6" rx="2" fill="rgba(90,175,255,.6)"/>
+            <rect x="51"  y="187" width="13" height="6" rx="2" fill="rgba(90,175,255,.6)"/>
+            <g fill="rgba(90,175,255,.3)">
+              <circle cx="163" cy="122" r="2.5"/><circle cx="184" cy="144" r="2.5"/>
+              <circle cx="192" cy="170" r="2.5"/><circle cx="184" cy="214" r="2.5"/>
+              <circle cx="163" cy="236" r="2.5"/><circle cx="97"  cy="122" r="2.5"/>
+              <circle cx="76"  cy="144" r="2.5"/><circle cx="68"  cy="170" r="2.5"/>
+              <circle cx="76"  cy="214" r="2.5"/><circle cx="97"  cy="236" r="2.5"/>
+            </g>
+            <circle cx="92"  cy="190" r="19" fill="#0A0A08" stroke="rgba(90,175,255,.2)" stroke-width=".8"/>
+            <circle cx="130" cy="230" r="19" fill="#0A0A08" stroke="rgba(90,175,255,.2)" stroke-width=".8"/>
+            <circle cx="168" cy="190" r="19" fill="#0A0A08" stroke="rgba(90,175,255,.2)" stroke-width=".8"/>
+            <line x1="92"  y1="190" x2="92"  y2="175" stroke="rgba(90,175,255,.5)" stroke-width="1.1" stroke-linecap="round"/>
+            <line x1="130" y1="230" x2="138" y2="216" stroke="rgba(90,175,255,.5)" stroke-width="1.1" stroke-linecap="round"/>
+            <line x1="168" y1="190" x2="170" y2="173" stroke="rgba(90,175,255,.5)" stroke-width="1.1" stroke-linecap="round"/>
+            <rect x="143" y="179" width="18" height="12" rx="2.5" fill="#050505" stroke="rgba(90,175,255,.25)" stroke-width=".6"/>
+            <text x="152" y="188" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7.5" fill="rgba(90,175,255,.5)">17</text>
+            <text x="130" y="172" text-anchor="middle" font-family="Syne,sans-serif" font-size="9.5" font-weight="700" fill="rgba(90,175,255,.7)" letter-spacing="4">TRUWOOD</text>
+            <text x="130" y="181" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="5" fill="rgba(228,240,236,.2)" letter-spacing="3">PILOT · CHRONOGRAPH</text>
+            <path d="M129 190 L126.5 132 L130 126 L133.5 132 Z" fill="#E4F0EC" opacity=".7"/>
+            <path d="M130 190 L160 162 L163 156 L168 159 L163 165 L132 193 Z" fill="#E4F0EC" opacity=".7"/>
+            <line x1="130" y1="190" x2="110" y2="130" stroke="rgba(90,175,255,.8)" stroke-width="1.1" stroke-linecap="round"/>
+            <line x1="130" y1="190" x2="138" y2="216" stroke="rgba(90,175,255,.8)" stroke-width="1.1" stroke-linecap="round"/>
+            <circle cx="130" cy="190" r="5.5" fill="rgba(90,175,255,.8)" filter="url(#ag)"/>
+            <circle cx="130" cy="190" r="2.5" fill="#020812"/>
+          </g>
+
+          <!-- LAYER: CRYSTAL -->
+          <g id="al-crystal" opacity=".12">
+            <circle cx="130" cy="190" r="88" fill="rgba(90,175,255,.05)" stroke="rgba(90,175,255,.4)" stroke-width="1.5"/>
+            <ellipse cx="106" cy="156" rx="28" ry="15" fill="white" opacity=".06" transform="rotate(-26 106 156)"/>
+            <ellipse cx="134" cy="136" rx="14" ry="7" fill="white" opacity=".05"/>
+            <circle cx="130" cy="190" r="88" fill="none" stroke="rgba(90,175,255,.15)" stroke-width="4"/>
+            <text x="130" y="194" text-anchor="middle" font-family="Syne,sans-serif" font-size="8" font-weight="600" fill="rgba(90,175,255,.35)" letter-spacing="3">SAPPHIRE</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Sequential text panels -->
+      <div class="anat-text" id="anat-panels">
+        <!-- Panel 0: Crystal -->
+        <div class="layer-panel" id="panel-0">
+          <div class="panel-tag">01 / 05 — Crystal</div>
+          <h3 class="panel-h">Sapphire<br>Crystal</h3>
+          <p class="panel-body">Harder than steel and optically pure — the anti-reflective sapphire lens eliminates glare in any light. From boardroom to backcountry, you'll always read it clearly.</p>
+          <div class="panel-stat">350× harder than standard mineral glass</div>
+        </div>
+        <!-- Panel 1: Dial -->
+        <div class="layer-panel" id="panel-1">
+          <div class="panel-tag">02 / 05 — Dial</div>
+          <h3 class="panel-h">Chronograph<br>Dial</h3>
+          <p class="panel-body">Three subdials track elapsed minutes, running seconds, and hours independently. The matte black finish is purpose-engineered to reduce eye strain in bright conditions.</p>
+          <div class="panel-stat">3 subdials · matte black · anti-glare finish</div>
+        </div>
+        <!-- Panel 2: Case -->
+        <div class="layer-panel" id="panel-2">
+          <div class="panel-tag">03 / 05 — Case</div>
+          <h3 class="panel-h">Black<br>Sandalwood</h3>
+          <p class="panel-body">The 45mm case is hand-shaped from genuine black sandalwood. No two pieces share the same grain. What you wear is cut from one specific tree — a pattern that has never existed before and never will again.</p>
+          <div class="panel-stat">45mm · 10.5mm thin · water resistant 3ATM</div>
+        </div>
+        <!-- Panel 3: Movement -->
+        <div class="layer-panel" id="panel-3">
+          <div class="panel-tag">04 / 05 — Movement</div>
+          <h3 class="panel-h">Japanese<br>Movement</h3>
+          <p class="panel-body">Precision Japanese quartz — keeping time to within ±15 seconds per month. Two side pushers activate the chronograph. Simple, reliable, built to outlast a decade of daily wear.</p>
+          <div class="panel-stat">±15s / month · quartz · Japan</div>
+        </div>
+        <!-- Panel 4: Strap -->
+        <div class="layer-panel" id="panel-4">
+          <div class="panel-tag">05 / 05 — Band</div>
+          <h3 class="panel-h">Wood<br>Link Band</h3>
+          <p class="panel-body">Each link is individually cut and polished from the same black sandalwood as the case. The quick-release spring bars let you swap bands in seconds — no tools, no fuss.</p>
+          <div class="panel-stat">Quick-release spring bars · adjustable fit</div>
+        </div>
+
+        <!-- Step dots -->
+        <div class="step-row" id="step-row">
+          <div class="step-d" id="sd-0"></div>
+          <div class="step-d" id="sd-1"></div>
+          <div class="step-d" id="sd-2"></div>
+          <div class="step-d" id="sd-3"></div>
+          <div class="step-d" id="sd-4"></div>
+          <span class="step-num" id="step-num">1 / 5</span>
+        </div>
+
+        <!-- CTA inside anatomy -->
+        <div style="margin-top:1.6rem;opacity:0" id="anat-cta">
+          <button class="btn-g" style="background:var(--a-anatomy);color:#020912" onclick="document.getElementById('s-cta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── WOOD: Old Growth ────────────────────────────────── -->
+<section class="section" id="s-wood">
+  <div class="wood-inner">
+    <div id="wood-l">
+      <div class="wood-hl">The Material</div>
+      <h2 class="wood-h">Born from<br>old growth.</h2>
+      <p class="wood-body">Each Truwood case is hand-cut from genuine black sandalwood — one of nature's densest, most aromatic hardwoods. It doesn't just look like nature. It smells like it.</p>
+      <p class="wood-body" style="margin-top:.8rem">No two watches share the same grain pattern. The watch you receive has never existed before, and never will again.</p>
+      <div class="wood-stats">
+        <div class="ws"><div class="ws-n">45<span style="font-size:1.1rem">mm</span></div><div class="ws-l">Case diameter</div></div>
+        <div class="ws"><div class="ws-n">100%</div><div class="ws-l">Natural wood</div></div>
+        <div class="ws"><div class="ws-n">0</div><div class="ws-l">Identical pieces</div></div>
+        <div class="ws"><div class="ws-n">10+</div><div class="ws-l">Trees planted</div></div>
+      </div>
+      <div style="margin-top:2.5rem;display:flex;gap:.8rem;flex-wrap:wrap">
+        <button class="btn-g" style="background:var(--a-wood);color:#090600" onclick="document.getElementById('s-cta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+        <button class="btn-s" style="border-color:rgba(158,200,64,.25)">Wood Types</button>
+      </div>
+    </div>
+    <div id="wood-r" style="display:flex;justify-content:center;align-items:center">
+      <svg viewBox="0 0 280 298" width="280" height="298">
+        <defs>
+          <radialGradient id="wg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2A3810"/>
+            <stop offset="16%" stop-color="#1E2C0C"/>
+            <stop offset="32%" stop-color="#182408"/>
+            <stop offset="48%" stop-color="#121C06"/>
+            <stop offset="64%" stop-color="#0E1604"/>
+            <stop offset="80%" stop-color="#0A1002"/>
+            <stop offset="100%" stop-color="#060A01"/>
+          </radialGradient>
+          <clipPath id="wcc"><circle cx="140" cy="140" r="128"/></clipPath>
+        </defs>
+        <circle cx="140" cy="140" r="128" fill="url(#wg)"/>
+        <circle cx="140" cy="140" r="20"  fill="none" stroke="rgba(158,200,64,.5)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="36"  fill="none" stroke="rgba(130,170,50,.4)" stroke-width="1"/>
+        <circle cx="140" cy="140" r="54"  fill="none" stroke="rgba(158,200,64,.45)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="70"  fill="none" stroke="rgba(120,160,44,.35)" stroke-width="1"/>
+        <circle cx="140" cy="140" r="88"  fill="none" stroke="rgba(158,200,64,.4)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="104" fill="none" stroke="rgba(120,160,44,.3)" stroke-width="1"/>
+        <circle cx="140" cy="140" r="120" fill="none" stroke="rgba(158,200,64,.38)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="127" fill="none" stroke="rgba(80,110,20,.45)" stroke-width="2"/>
+        <line x1="12" y1="140" x2="268" y2="140" stroke="rgba(100,140,30,.1)" stroke-width="1" clip-path="url(#wcc)"/>
+        <line x1="140" y1="12"  x2="140" y2="268" stroke="rgba(100,140,30,.08)" stroke-width="1" clip-path="url(#wcc)"/>
+        <circle cx="140" cy="140" r="128" fill="none" stroke="#090600" stroke-width="6"/>
+        <circle cx="140" cy="140" r="5" fill="#9EC840" opacity=".6"/>
+        <line x1="142" y1="139" x2="178" y2="139" stroke="rgba(158,200,64,.3)" stroke-width=".8"/>
+        <text x="180" y="143" font-family="Syne,sans-serif" font-size="7.5" font-weight="600" fill="rgba(158,200,64,.55)" letter-spacing="1">68 rings</text>
+        <text x="140" y="278" text-anchor="middle" font-family="Syne,sans-serif" font-size="11" font-weight="700" fill="rgba(158,200,64,.55)" letter-spacing="4">SANDALWOOD</text>
+        <text x="140" y="292" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7" fill="rgba(228,240,236,.25)" letter-spacing="3">HANDCRAFTED</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ── MOVEMENT: Deep Jungle ───────────────────────────── -->
+<div id="movement-wrapper">
+  <section class="section" id="s-movement">
+    <div class="move-inner">
+      <!-- Gear visual -->
+      <div id="mvis">
+        <svg id="gear-svg" viewBox="0 0 320 320" width="320" height="320" fill="none">
+          <defs><filter id="mg"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <circle cx="160" cy="160" r="150" fill="rgba(0,255,186,.02)" stroke="rgba(0,255,186,.1)" stroke-width="1"/>
+          <circle cx="160" cy="160" r="128" fill="none" stroke="rgba(0,255,186,.05)" stroke-width=".8" stroke-dasharray="3 4"/>
+          <!-- Main gear -->
+          <g id="g1">
+            <circle cx="160" cy="160" r="52" fill="rgba(0,255,186,.03)" stroke="rgba(0,255,186,.55)" stroke-width="1.8"/>
+            <circle cx="160" cy="160" r="40" fill="none" stroke="rgba(0,255,186,.15)" stroke-width="1"/>
+            <line x1="160" y1="160" x2="160" y2="108" stroke="rgba(0,255,186,.4)" stroke-width="1.4"/>
+            <line x1="160" y1="160" x2="205" y2="186" stroke="rgba(0,255,186,.4)" stroke-width="1.4"/>
+            <line x1="160" y1="160" x2="115" y2="186" stroke="rgba(0,255,186,.4)" stroke-width="1.4"/>
+            <g stroke="rgba(0,255,186,.65)" stroke-width="2" stroke-linecap="round">
+              <line x1="160" y1="108" x2="160" y2="97"/><line x1="178" y1="113" x2="183" y2="102"/>
+              <line x1="193" y1="126" x2="201" y2="118"/><line x1="200" y1="143" x2="210" y2="141"/>
+              <line x1="199" y1="162" x2="210" y2="163"/><line x1="191" y1="179" x2="200" y2="185"/>
+              <line x1="178" y1="192" x2="183" y2="202"/><line x1="160" y1="196" x2="160" y2="207"/>
+              <line x1="142" y1="192" x2="137" y2="202"/><line x1="129" y1="179" x2="120" y2="185"/>
+              <line x1="121" y1="162" x2="110" y2="163"/><line x1="120" y1="143" x2="110" y2="141"/>
+              <line x1="127" y1="126" x2="119" y2="118"/><line x1="142" y1="113" x2="137" y2="102"/>
+            </g>
+            <circle cx="160" cy="160" r="11" fill="rgba(0,255,186,.18)" filter="url(#mg)"/>
+            <circle cx="160" cy="160" r="5" fill="#00FFBA" opacity=".85"/>
+            <circle cx="160" cy="160" r="2.5" fill="#010B05"/>
+          </g>
+          <!-- Pallet -->
+          <g id="g2">
+            <circle cx="234" cy="100" r="28" fill="rgba(0,196,160,.03)" stroke="rgba(0,196,160,.45)" stroke-width="1.4"/>
+            <g stroke="rgba(0,196,160,.5)" stroke-width="1.6" stroke-linecap="round">
+              <line x1="234" y1="72" x2="234" y2="63"/><line x1="249" y1="77" x2="254" y2="68"/>
+              <line x1="260" y1="90" x2="267" y2="84"/><line x1="264" y1="105" x2="272" y2="104"/>
+              <line x1="262" y1="118" x2="269" y2="122"/><line x1="253" y1="129" x2="258" y2="136"/>
+              <line x1="240" y1="134" x2="243" y2="142"/><line x1="226" y1="134" x2="223" y2="142"/>
+              <line x1="215" y1="129" x2="210" y2="136"/><line x1="206" y1="118" x2="199" y2="122"/>
+              <line x1="204" y1="105" x2="196" y2="104"/><line x1="208" y1="90" x2="201" y2="84"/>
+              <line x1="219" y1="77" x2="214" y2="68"/>
+            </g>
+            <circle cx="234" cy="100" r="5.5" fill="rgba(0,196,160,.28)"/>
+            <circle cx="234" cy="100" r="2.5" fill="#00FFBA" opacity=".7"/>
+          </g>
+          <!-- Balance -->
+          <g id="g3">
+            <circle cx="246" cy="220" r="24" fill="rgba(0,255,186,.03)" stroke="rgba(0,255,186,.45)" stroke-width="1.8"/>
+            <line x1="222" y1="220" x2="270" y2="220" stroke="rgba(0,255,186,.45)" stroke-width="1.4"/>
+            <line x1="246" y1="196" x2="246" y2="244" stroke="rgba(0,255,186,.45)" stroke-width="1.4"/>
+            <circle cx="222" cy="220" r="5" fill="#00FFBA" opacity=".5" filter="url(#mg)"/>
+            <circle cx="270" cy="220" r="5" fill="#00FFBA" opacity=".5" filter="url(#mg)"/>
+            <circle cx="246" cy="220" r="5" fill="#00FFBA" opacity=".7"/>
+          </g>
+          <!-- Barrel -->
+          <g id="g4">
+            <circle cx="90" cy="100" r="32" fill="rgba(0,196,160,.03)" stroke="rgba(0,196,160,.4)" stroke-width="1.4"/>
+            <circle cx="90" cy="100" r="24" fill="none" stroke="rgba(0,196,160,.12)" stroke-width="1"/>
+            <g stroke="rgba(0,196,160,.45)" stroke-width="1.6" stroke-linecap="round">
+              <line x1="90" y1="68" x2="90" y2="59"/><line x1="106" y1="73" x2="111" y2="64"/>
+              <line x1="118" y1="85" x2="124" y2="79"/><line x1="122" y1="100" x2="130" y2="100"/>
+              <line x1="118" y1="115" x2="124" y2="121"/><line x1="106" y1="127" x2="111" y2="136"/>
+              <line x1="90"  y1="132" x2="90"  y2="141"/><line x1="74"  y1="127" x2="69"  y2="136"/>
+              <line x1="62"  y1="115" x2="56"  y2="121"/><line x1="58"  y1="100" x2="50"  y2="100"/>
+              <line x1="62"  y1="85"  x2="56"  y2="79"/> <line x1="74"  y1="73"  x2="69"  y2="64"/>
+            </g>
+            <circle cx="90" cy="100" r="6" fill="rgba(0,196,160,.25)"/>
+            <circle cx="90" cy="100" r="2.5" fill="#00FFBA" opacity=".65"/>
+          </g>
+          <line x1="160" y1="160" x2="234" y2="100" stroke="rgba(0,255,186,.06)" stroke-width="1" stroke-dasharray="3 5"/>
+          <line x1="160" y1="160" x2="90"  y2="100" stroke="rgba(0,196,160,.06)" stroke-width="1" stroke-dasharray="3 5"/>
+          <line x1="234" y1="100" x2="246" y2="220" stroke="rgba(0,255,186,.05)" stroke-width="1" stroke-dasharray="3 5"/>
+          <text x="160" y="296" text-anchor="middle" font-family="Syne,sans-serif" font-size="11" font-weight="700" fill="rgba(0,255,186,.35)" letter-spacing="4">JAPANESE MOVEMENT</text>
+          <text x="160" y="310" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7.5" fill="rgba(228,240,236,.2)" letter-spacing="2.5">PRECISION QUARTZ</text>
+        </svg>
+      </div>
+      <!-- Plain English explanations -->
+      <div id="mtxt">
+        <div class="move-hl">The Engine</div>
+        <h2 class="move-h">Precision<br>you can feel.</h2>
+        <div class="cards">
+          <div class="card">
+            <div class="card-n">01</div>
+            <div class="card-h">The stopwatch actually works</div>
+            <div class="card-p">Those 3 subdials aren't decoration. Two pushers on the side start, stop, and reset — exactly like a real stopwatch.</div>
+          </div>
+          <div class="card">
+            <div class="card-n">02</div>
+            <div class="card-h">±15 seconds per month</div>
+            <div class="card-p">Quartz precision keeps the Pilot accurate to within half a second per day — more reliable than most phones after a missed update.</div>
+          </div>
+          <div class="card">
+            <div class="card-n">03</div>
+            <div class="card-h">Made in Japan</div>
+            <div class="card-p">Japan has led precision timekeeping for over 150 years. This movement carries that 150-year reputation on your wrist.</div>
+          </div>
+          <div class="card">
+            <div class="card-n">04</div>
+            <div class="card-h">Water resistant to 30 metres</div>
+            <div class="card-p">Rain, splashes, sink — no problem. It's not a dive watch, but it's built to handle daily life without thinking twice.</div>
+          </div>
+        </div>
+        <div style="margin-top:1.8rem">
+          <button class="btn-g" style="background:var(--a-move);color:#010B05" onclick="document.getElementById('s-cta').scrollIntoView({behavior:'smooth'})">Add to Cart — $259</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── CTA: The Clearing ───────────────────────────────── -->
+<section class="section" id="s-cta">
+  <div class="fcta-inner" id="fcta-inner">
+    <div class="cta-tag">The Truwood Pilot</div>
+    <h2 class="cta-h">Own your<br><em>forest.</em></h2>
+    <div class="reviews">
+      <span class="stars">★★★★★</span>
+      <span class="rev">4.9 · 2,841 reviews</span>
+    </div>
+    <div class="price"><span>Starting from</span>$259</div>
+    <div class="btn-row">
+      <button class="btn-p" style="padding:1.1rem 3.2rem;font-size:.75rem">Add to Cart</button>
+      <button class="btn-s" style="padding:1.1rem 3.2rem;font-size:.75rem">View All Models</button>
+    </div>
+    <div class="trust">
+      <span class="ti">Free worldwide shipping</span>
+      <span class="ti">1-year warranty</span>
+      <span class="ti">30-day returns</span>
+      <span class="ti">10 trees planted per order</span>
+    </div>
+    <p class="footer-note">Truwood · Every order plants 10 trees · Handcrafted</p>
+  </div>
+</section>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── ANATOMY LAYER DATA ─────────────────────────────────── */
+const LAYERS = ['al-crystal','al-dial','al-case','al-move','al-strap'];
+const LABELS = ['panel-0','panel-1','panel-2','panel-3','panel-4'];
+const DOTS   = ['sd-0','sd-1','sd-2','sd-3','sd-4'];
+let currentLayer = -1;
+
+function activateLayer(idx) {
+  if (idx === currentLayer) return;
+  currentLayer = idx;
+
+  LAYERS.forEach((id, i) => {
+    gsap.to(`#${id}`, {
+      opacity: i === idx ? 1 : 0.08,
+      duration: .5,
+      ease: 'power2.out',
+      filter: i === idx ? 'brightness(1.15)' : 'brightness(1)',
+    });
+  });
+
+  LABELS.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (i === idx) {
+      el.classList.add('is-active');
+      gsap.fromTo(el, {opacity:0,y:14}, {opacity:1,y:0,duration:.45,ease:'power2.out'});
+    } else {
+      el.classList.remove('is-active');
+      gsap.set(el, {opacity:0,y:0});
+    }
+  });
+
+  DOTS.forEach((id, i) => {
+    document.getElementById(id)?.classList.toggle('active', i === idx);
+  });
+
+  const numEl = document.getElementById('step-num');
+  if (numEl) numEl.textContent = `${idx+1} / 5`;
+}
+
+/* Initialize first layer visible */
+activateLayer(0);
+
+/* ── ANATOMY SCROLL ─────────────────────────────────────── */
+const anatomyTL = gsap.timeline({
+  scrollTrigger: {
+    trigger: '#anatomy-wrapper',
+    start: 'top top',
+    end: '+=2500',
+    pin: true,
+    scrub: 1,
+    anticipatePin: 1,
+    snap: { snapTo: [0,.2,.4,.6,.8,1], duration:.35, delay:.1, ease:'power1.inOut' },
+    onUpdate(st) {
+      const p = st.progress;
+      const idx = Math.min(4, Math.floor(p * 5 + .05));
+      activateLayer(idx);
+      /* show CTA at end */
+      if (p > .88) gsap.to('#anat-cta',{opacity:1,duration:.4});
+      else gsap.to('#anat-cta',{opacity:0,duration:.2});
+    }
+  }
+});
+
+/* ── HERO ENTRANCE ──────────────────────────────────────── */
+gsap.set(['#hero-watch','#hero-txt','#scroll-cue'],{opacity:0});
+gsap.set('#hero-watch',{y:32,scale:.94});
+gsap.set('#hero-txt',{y:24});
+
+gsap.timeline({delay:.35})
+  .to('#hero-watch',{opacity:1,y:0,scale:1,duration:1.4,ease:'power3.out'})
+  .to('#hero-txt',{opacity:1,y:0,duration:1,ease:'power3.out'},0.5)
+  .to('#scroll-cue',{opacity:1,duration:.6},1.2);
+
+/* ── GEAR ANIMATIONS ────────────────────────────────────── */
+gsap.to('#g1',{rotation:360, transformOrigin:'160px 160px',duration:7,  repeat:-1,ease:'none'});
+gsap.to('#g2',{rotation:-360,transformOrigin:'234px 100px',duration:4.5,repeat:-1,ease:'none'});
+gsap.to('#g4',{rotation:360, transformOrigin:'90px 100px', duration:9,  repeat:-1,ease:'none'});
+gsap.to('#g3',{rotation:24,  transformOrigin:'246px 220px',duration:.42,repeat:-1,yoyo:true,ease:'sine.inOut'});
+
+/* ── MOVEMENT PIN ───────────────────────────────────────── */
+ScrollTrigger.create({
+  trigger:'#movement-wrapper',
+  start:'top top',
+  end:'+=1600',
+  pin:true,
+  anticipatePin:1,
+});
+gsap.from('#mvis',{
+  scrollTrigger:{trigger:'#movement-wrapper',start:'top 85%',end:'top 25%',scrub:1},
+  x:-55,opacity:0
+});
+gsap.from('#mtxt > *',{
+  scrollTrigger:{trigger:'#movement-wrapper',start:'top 85%',end:'top 20%',scrub:.8},
+  x:45,opacity:0,stagger:.06
+});
+
+/* ── WOOD SECTION ───────────────────────────────────────── */
+gsap.from('#wood-l > *',{
+  scrollTrigger:{trigger:'#s-wood',start:'top 80%',end:'top 20%',scrub:.8},
+  x:-45,opacity:0,stagger:.08
+});
+gsap.from('#wood-r',{
+  scrollTrigger:{trigger:'#s-wood',start:'top 80%',end:'top 20%',scrub:.8},
+  x:45,opacity:0,scale:.92
+});
+
+/* ── FINAL CTA ──────────────────────────────────────────── */
+gsap.from('#fcta-inner > *',{
+  scrollTrigger:{trigger:'#s-cta',start:'top 75%',end:'top 15%',scrub:.7},
+  y:40,opacity:0,stagger:.07
+});
+</script>
+</body>
+</html>
